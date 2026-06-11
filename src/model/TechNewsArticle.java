@@ -1,5 +1,7 @@
 package model;
 
+import java.util.regex.Pattern;
+
 /**
  * A standard Hacker News story with points, comments, and hype keyword density.
  */
@@ -79,11 +81,18 @@ public class TechNewsArticle extends WebData {
 
     private boolean containsAny(String text, String... keywords) {
         for (String keyword : keywords) {
-            if (text.contains(keyword)) {
+            if (containsKeyword(text, keyword)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean containsKeyword(String text, String keyword) {
+        if (keyword.length() <= 3) {
+            return Pattern.compile("\\b" + Pattern.quote(keyword) + "\\b").matcher(text).find();
+        }
+        return text.contains(keyword);
     }
 
     @Override

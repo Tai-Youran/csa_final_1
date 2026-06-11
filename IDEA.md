@@ -3,7 +3,7 @@
 > **Final Project Idea (Complete D.O.A. Blueprint)**  
 > Track B: Silicon Valley Sentiment Tracker · Option 1: Industrial Terminal UI  
 > 全新项目 · 与 stock 无关 · Vibe Coding Protocol  
-> **项目路径：** `/Users/chenmin/IdeaProjects/coding`
+> **项目路径：** `/Users/peanut/Downloads/csa_final_1-main`
 
 ---
 
@@ -250,12 +250,14 @@ selectionSortByHypeScore(ArrayList<TechNewsArticle> list):
 ```
 TerminalRenderer
 ├── printHeader(ScraperResult)
+├── printDashboard(ScraperResult, List<TechNewsArticle>, String)
 ├── printArticleTable(ArrayList<TechNewsArticle>)
-├── printCategoryMatrix(double[][], String[])
+├── printCategoryMatrix(CategoryMatrixResult)
+├── printRedTeamStart / printRedTeamAttempt / printRedTeamEnd
 └── printSecurityBlock(String reason)
 
 Main
-└── scrape → count hype → sort → render → menu loop
+└── scrape → count hype → sort → render dashboard/table → menu loop
 ```
 
 ---
@@ -317,13 +319,15 @@ public final class InputSanitizer {
 
 ---
 
-## 7. 项目文件结构（IdeaProjects/coding）
+## 7. 项目文件结构（csa_final_1-main）
 
 ```
-IdeaProjects/coding/
+csa_final_1-main/
 ├── IDEA.md                           ← 本文件
 ├── PROMPT_LEDGER.md
 ├── coding.iml
+├── lib/
+│   └── jsoup-1.17.2.jar
 ├── src/
 │   ├── Main.java
 │   ├── model/
@@ -345,9 +349,7 @@ IdeaProjects/coding/
 │       ├── InputSanitizer.java
 │       └── SecurityViolationException.java
 ├── test/
-│   ├── HypeScoreSorterTest.java
-│   ├── InputSanitizerTest.java
-│   └── CategoryMatrixBuilderTest.java
+│   └── ProjectSmokeTest.java
 └── samples/
     └── sample_hn_frontpage.html      ← 保存一页 HN HTML 供 @ 引用
 ```
@@ -419,7 +421,7 @@ Add tests in @InputSanitizerTest.java for valid input, injection, overlong input
 | Hook | 0:00–1:00 | Tech 舆论太快，PulseWire = live quantified sentiment | 标题 slide |
 | Demo | 1:00–2:30 | 运行程序 → 62 nodes → Hype 排序 → Category Matrix | 全屏终端录屏 |
 | Architecture | 2:30–3:30 | WebData → TechNewsArticle / ShowHNPost 多态；Selection Sort；Jsoup pipeline | IDE 类图 |
-| Red Team | 3:30–5:00 | 注入攻击 → 拦截 → 合法 filter "AI" 成功 | 终端输入演示 |
+| Red Team | 3:30–5:00 | 按 `[7]` 展示批量注入攻击 → 拦截 → 合法 filter "AI" 成功 | 终端输入演示 |
 
 ---
 
@@ -458,4 +460,4 @@ Add tests in @InputSanitizerTest.java for valid input, injection, overlong input
 
 ---
 
-*Status: COMPLETE — 已写入 IdeaProjects/coding，非 stock 方向，可开始建空壳类文件。*
+*Status: IMPLEMENTED — 当前版本已具备 live scrape、OOP hierarchy、custom algorithms、industrial terminal UI、red-team demo、prompt ledger 和 smoke test。*

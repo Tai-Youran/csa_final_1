@@ -1,5 +1,7 @@
 package algorithm;
 
+import java.util.regex.Pattern;
+
 /**
  * Counts distinct hype keywords in a headline.
  */
@@ -22,11 +24,18 @@ public final class HypeWordCounter {
         int count = 0;
 
         for (String word : HYPE_WORDS) {
-            if (lower.contains(word)) {
+            if (containsKeyword(lower, word)) {
                 count++;
             }
         }
 
         return count;
+    }
+
+    private static boolean containsKeyword(String text, String keyword) {
+        if (keyword.length() <= 3) {
+            return Pattern.compile("\\b" + Pattern.quote(keyword) + "\\b").matcher(text).find();
+        }
+        return text.contains(keyword);
     }
 }
