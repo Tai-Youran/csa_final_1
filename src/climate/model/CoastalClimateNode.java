@@ -6,7 +6,15 @@ public class CoastalClimateNode extends CityClimateNode {
                               double latitude, double longitude, double elevation,
                               String localTime, double temperatureC, int humidity,
                               double precipitationMm, int weatherCode, double windSpeedKmh) {
-        super(id, city, country, region, latitude, longitude, elevation, localTime,
+        this(id, city, country, region, "", latitude, longitude, elevation, localTime,
+                temperatureC, humidity, precipitationMm, weatherCode, windSpeedKmh);
+    }
+
+    public CoastalClimateNode(String id, String city, String country, String region, String adminArea,
+                              double latitude, double longitude, double elevation,
+                              String localTime, double temperatureC, int humidity,
+                              double precipitationMm, int weatherCode, double windSpeedKmh) {
+        super(id, city, country, region, adminArea, latitude, longitude, elevation, localTime,
                 temperatureC, humidity, precipitationMm, weatherCode, windSpeedKmh);
     }
 

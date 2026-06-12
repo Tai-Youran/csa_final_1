@@ -3,6 +3,7 @@ package climate.model;
 public class CityClimateNode extends ClimateData {
 
     private final String localTime;
+    private final String adminArea;
     private final double temperatureC;
     private final int humidity;
     private final double precipitationMm;
@@ -13,7 +14,16 @@ public class CityClimateNode extends ClimateData {
                            double latitude, double longitude, double elevation,
                            String localTime, double temperatureC, int humidity,
                            double precipitationMm, int weatherCode, double windSpeedKmh) {
+        this(id, city, country, region, "", latitude, longitude, elevation, localTime,
+                temperatureC, humidity, precipitationMm, weatherCode, windSpeedKmh);
+    }
+
+    public CityClimateNode(String id, String city, String country, String region, String adminArea,
+                           double latitude, double longitude, double elevation,
+                           String localTime, double temperatureC, int humidity,
+                           double precipitationMm, int weatherCode, double windSpeedKmh) {
         super(id, city, country, region, latitude, longitude, elevation);
+        this.adminArea = adminArea == null || adminArea.isBlank() ? "Unspecified" : adminArea;
         this.localTime = localTime == null ? "" : localTime;
         this.temperatureC = temperatureC;
         this.humidity = Math.max(0, Math.min(100, humidity));
@@ -24,6 +34,10 @@ public class CityClimateNode extends ClimateData {
 
     public String getLocalTime() {
         return localTime;
+    }
+
+    public String getAdminArea() {
+        return adminArea;
     }
 
     public double getTemperatureC() {

@@ -2,7 +2,7 @@ import auth.AuthService;
 import auth.SessionStore;
 import auth.UserSession;
 import climate.algorithm.ClimateMatrixBuilder;
-import climate.algorithm.ClimateRiskSorter;
+import climate.algorithm.StargazingWindowSorter;
 import climate.model.CityClimateNode;
 import climate.scraper.ClimateDataScraper;
 import climate.scraper.ClimateScraperResult;
@@ -37,6 +37,7 @@ public class ClimateShieldWebMain {
         server.createContext("/styles.css", exchange -> serveStatic(exchange, "web-climate/styles.css", "text/css"));
         server.createContext("/app.js", exchange -> serveStatic(exchange, "web-climate/app.js", "application/javascript"));
         server.createContext("/api/login", ClimateShieldWebMain::login);
+        server.createContext("/api/signup", ClimateShieldWebMain::signup);
         server.createContext("/api/logout", ClimateShieldWebMain::logout);
         server.createContext("/api/me", ClimateShieldWebMain::me);
         server.createContext("/api/climate", ClimateShieldWebMain::climate);
@@ -44,7 +45,7 @@ public class ClimateShieldWebMain {
         server.createContext("/api/red-team", ClimateShieldWebMain::redTeam);
         server.start();
 
-        System.out.println("ClimateShield web app running at http://localhost:" + PORT);
+        System.out.println("StarScope web app running at http://localhost:" + PORT);
         System.out.println("Demo users: admin / GridAdmin2026! and analyst / StudentRadar2026!");
         System.out.println("Press Ctrl+C to stop the server.");
     }
@@ -67,6 +68,28 @@ public class ClimateShieldWebMain {
         exchange.getResponseHeaders().add("Set-Cookie",
                 "CLIMATE_SESSION=" + token + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=2700");
         audit("LOGIN username=" + session.getUsername() + " role=" + session.getRole());
+        send(exchange, 200, "application/json", sessionJson(session));
+    }
+
+    private static void signup(HttpExchange exchange) throws IOException {
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            send(exchange, 405, "application/json", "{\"error\":\"METHOD_NOT_ALLOWED\"}");
+            return;
+        }
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        Map<String, String> form = parseForm(body);
+        AuthService.SignupResult result = AUTH.signup(form.get("username"), form.get("password"));
+        if (!result.isOk()) {
+            audit("FAILED_SIGNUP username=" + form.getOrDefault("username", "") + " reason=" + result.getReason());
+            send(exchange, 400, "application/json", "{\"error\":\"" + escape(result.getReason()) + "\"}");
+            return;
+        }
+
+        UserSession session = result.getSession();
+        String token = SESSIONS.create(session);
+        exchange.getResponseHeaders().add("Set-Cookie",
+                "CLIMATE_SESSION=" + token + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=2700");
+        audit("SIGNUP username=" + session.getUsername() + " role=" + session.getRole());
         send(exchange, 200, "application/json", sessionJson(session));
     }
 
@@ -101,7 +124,7 @@ public class ClimateShieldWebMain {
         try {
             ClimateScraperResult result = SCRAPER.scrape();
             ArrayList<CityClimateNode> nodes = new ArrayList<>(result.getNodes());
-            ClimateRiskSorter.selectionSortByRisk(nodes);
+            StargazingWindowSorter.selectionSortByStargazingScore(nodes);
             ClimateMatrixBuilder.ClimateMatrixResult matrix = ClimateMatrixBuilder.buildRegionMatrix(nodes);
             audit("CLIMATE_REFRESH username=" + session.getUsername() + " nodes=" + result.getNodeCount());
             send(exchange, 200, "application/json", climateJson(result, nodes, matrix, session));
@@ -206,10 +229,16 @@ public class ClimateShieldWebMain {
             json.append('{')
                     .append("\"city\":\"").append(escape(node.getCity())).append("\",")
                     .append("\"country\":\"").append(escape(node.getCountry())).append("\",")
+                    .append("\"adminArea\":\"").append(escape(node.getAdminArea())).append("\",")
                     .append("\"region\":\"").append(escape(node.getRegion())).append("\",")
                     .append("\"nodeType\":\"").append(escape(node.getNodeType())).append("\",")
                     .append("\"riskBand\":\"").append(escape(node.getRiskBand())).append("\",")
                     .append("\"risk\":").append(String.format(java.util.Locale.US, "%.1f", node.calculateRiskScore())).append(',')
+                    .append("\"stargazingScore\":").append(String.format(java.util.Locale.US, "%.1f", stargazingScore(node))).append(',')
+                    .append("\"viewingBand\":\"").append(escape(viewingBand(node))).append("\",")
+                    .append("\"advice\":\"").append(escape(viewingAdvice(node))).append("\",")
+                    .append("\"latitude\":").append(String.format(java.util.Locale.US, "%.5f", node.getLatitude())).append(',')
+                    .append("\"longitude\":").append(String.format(java.util.Locale.US, "%.5f", node.getLongitude())).append(',')
                     .append("\"temperature\":").append(String.format(java.util.Locale.US, "%.1f", node.getTemperatureC())).append(',')
                     .append("\"humidity\":").append(node.getHumidity()).append(',')
                     .append("\"precipitation\":").append(String.format(java.util.Locale.US, "%.2f", node.getPrecipitationMm())).append(',')
@@ -242,6 +271,38 @@ public class ClimateShieldWebMain {
                     .append('}');
         }
         json.append(']');
+    }
+
+    private static double stargazingScore(CityClimateNode node) {
+        return StargazingWindowSorter.score(node);
+    }
+
+    private static String viewingBand(CityClimateNode node) {
+        double score = stargazingScore(node);
+        if (score >= 82.0) {
+            return "Prime";
+        }
+        if (score >= 65.0) {
+            return "Good";
+        }
+        if (score >= 45.0) {
+            return "Marginal";
+        }
+        return "Poor";
+    }
+
+    private static String viewingAdvice(CityClimateNode node) {
+        String band = viewingBand(node);
+        if ("Prime".equals(band)) {
+            return "Best target tonight. Low weather obstruction and strong sky clarity potential.";
+        }
+        if ("Good".equals(band)) {
+            return "Usable viewing window. Bring warm clothing and monitor wind changes.";
+        }
+        if ("Marginal".equals(band)) {
+            return "Possible short observation window, but sky conditions may shift quickly.";
+        }
+        return "Not recommended for stargazing right now. Weather obstruction is too high.";
     }
 
     private static String sessionJson(UserSession session) {

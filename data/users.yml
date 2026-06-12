@@ -1,0 +1,11 @@
+users:
+  - username: admin
+    role: ADMIN
+    salt: HDD9JnQH_zztGGGLGlae6yuD
+    passwordHash: pbkdf2_sha256$120000$rXM75PLpWXRGKo0szUT5IPXVuUsI0sS/C8FJJI9AQOU=
+    createdAt: 1781263784586
+  - username: analyst
+    role: USER
+    salt: iy66Z5RbZwxyBUQt6B-GU6BX
+    passwordHash: pbkdf2_sha256$120000$hw1dqO11tCN//Ss+QRevKVVO3TbSrpGiF/GnUBzpij4=
+    createdAt: 1781263784662

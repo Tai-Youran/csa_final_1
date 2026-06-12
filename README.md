@@ -1,21 +1,27 @@
 # PulseWire
 
-## Recommended Final Version: ClimateShield
+## Recommended Final Version: StarScope
 
-ClimateShield is the more advanced final-project direction in this repo. It is a Java backend web app with login, roles, live dynamic data, OOP models, custom algorithms, a 2D matrix, and red-team defense.
+StarScope is the more advanced final-project direction in this repo. It is a Java backend web app with login, roles, live dynamic data, OOP models, custom algorithms, a 2D matrix, an interactive 3D constellation dome, and red-team defense.
 
-Theme: **Global Campus Safety & Climate Risk Radar**
+Theme: **Live Stargazing Opportunity Radar**
 
 Live data flow:
 
-1. The backend dynamically calls Open-Meteo's geocoding API to collect city nodes.
-2. The backend calls Open-Meteo's forecast API to fetch current weather for 60+ live nodes.
+1. The backend starts from a curated China/United States observing-site seed set, then dynamically calls Open-Meteo's geocoding API to expand the live city pool.
+2. The backend calls Open-Meteo's forecast API to fetch current weather for 72+ live nodes.
 3. Java converts those raw API records into polymorphic `ClimateData` objects.
-4. A custom Selection Sort ranks nodes by climate risk.
-5. A 2D region matrix summarizes count, average risk, average wind, max risk, and precipitation.
+4. A custom Selection Sort ranks nodes by stargazing score.
+5. A 2D region matrix summarizes count, sky quality, average wind, obstruction risk, and precipitation.
 6. A login system separates `ADMIN` and `USER` views.
+7. The user dashboard requires a country -> province/state -> city selection before recommendations. China and the United States include detailed province/state-level location options.
+8. The recommendation engine prioritizes same-province/state matches first, then expands to same-country matches if fewer than 10 local candidates exist.
+9. The user dashboard includes a Three.js-style 3D constellation dome with 12 educational constellations, clickable observing notes, seasons, hemispheres, key stars, and relative display sizes.
+10. The interface supports dark and light themes, white default constellation lines, hover/selected constellation highlighting, and a large decorative `STARS` wordmark.
+11. Signup is handled by the Java backend. New accounts are written to `data/users.yml` with salted PBKDF2 hashes, not plaintext passwords.
+12. Signup passwords must be at least 6 characters and include both letters and numbers. The frontend explains the rule, and the backend rejects weak passwords even if someone bypasses the UI.
 
-### Open ClimateShield
+### Open StarScope
 
 ```bash
 cd /Users/peanut/Downloads/csa_final_1-main
@@ -38,9 +44,11 @@ Admin:   admin   / GridAdmin2026!
 User:    analyst / StudentRadar2026!
 ```
 
-The backend does not store plaintext passwords. It stores SHA-256 hashes and creates session cookies after login.
+The backend does not store plaintext passwords. It stores salted PBKDF2-HMAC-SHA256 password hashes and creates session cookies after login.
+Current signup storage uses PBKDF2-HMAC-SHA256 with a per-user salt in `data/users.yml`; the frontend only calls backend APIs and never verifies passwords locally.
+Signup also enforces a minimum password rule: 6+ characters with both letters and numbers.
 
-Admin can see the restricted audit panel. User can see the live dashboard but cannot access admin audit logs.
+Admin can see the restricted audit panel, raw system activity, data source health, and red-team output. User can see the live stargazing dashboard, country/province/city recommendations, weather matrix, and constellation dome but cannot access admin audit logs.
 
 ---
 

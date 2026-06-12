@@ -3,26 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClimateShield Risk Radar</title>
+  <title>StarScope Stargazing Radar</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body data-theme="dark">
   <section id="loginView" class="login-shell">
+    <button id="loginThemeToggle" class="theme-toggle login-theme" type="button" aria-label="Toggle theme">Light</button>
     <div class="login-copy">
-      <p class="eyebrow">Global campus safety intelligence</p>
-      <h1>ClimateShield</h1>
-      <p class="lede">Live weather risk scoring for student travel, school operations, and emergency planning.</p>
+      <p class="eyebrow">Live astronomy planning intelligence</p>
+      <h1>StarScope</h1>
+      <p class="lede">A role-based stargazing radar that turns live weather into tonight's best observation windows.</p>
+      <div class="hero-readout">
+        <span>Dynamic weather</span>
+        <span>Role-based backend</span>
+        <span>3D constellation dome</span>
+      </div>
     </div>
     <form id="loginForm" class="login-card">
-      <h2>Secure Login</h2>
+      <div class="auth-tabs">
+        <button id="loginModeBtn" class="is-active" type="button">Login</button>
+        <button id="signupModeBtn" type="button">Sign Up</button>
+      </div>
+      <h2 id="authTitle">Secure Login</h2>
       <label>Username <input name="username" autocomplete="username" required></label>
       <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
-      <button type="submit">Enter Dashboard</button>
+      <label id="confirmPasswordLabel" class="hidden">Confirm Password <input name="confirmPassword" type="password" autocomplete="new-password"></label>
+      <p id="passwordRule" class="password-rule hidden">Password must be at least 6 characters and include both letters and numbers.</p>
+      <button id="authSubmitBtn" type="submit">Enter Dashboard</button>
       <p id="loginError" class="error"></p>
       <div class="demo">
         <strong>Demo accounts</strong>
         <span>admin / GridAdmin2026!</span>
         <span>analyst / StudentRadar2026!</span>
+        <span>New signups become USER accounts.</span>
       </div>
     </form>
   </section>
@@ -30,51 +43,103 @@
   <section id="appView" class="app hidden">
     <header class="topbar">
       <div>
-        <p class="eyebrow">ClimateShield Risk Radar</p>
-        <h1>Global Safety Matrix</h1>
+        <p class="eyebrow">StarScope Observation Radar</p>
+        <h1>Tonight's Sky Window</h1>
       </div>
       <div class="user-box">
         <span id="roleBadge">ROLE</span>
         <strong id="usernameLabel">user</strong>
+        <button id="themeToggle" class="theme-toggle" type="button">Light</button>
         <button id="logoutBtn" type="button">Logout</button>
       </div>
     </header>
 
     <main>
       <section class="metrics">
-        <div><span>Live Nodes</span><strong id="nodeCount">--</strong></div>
+        <div><span>Forecast Nodes</span><strong id="nodeCount">--</strong></div>
         <div><span>Geocoded Pool</span><strong id="geoCount">--</strong></div>
-        <div><span>Critical Nodes</span><strong id="criticalCount">--</strong></div>
-        <div><span>Lead Risk</span><strong id="leadRisk">Loading...</strong></div>
+        <div><span>Prime Windows</span><strong id="criticalCount">--</strong></div>
+        <div><span>Best Tonight</span><strong id="leadRisk">Loading...</strong></div>
+      </section>
+
+      <section class="location-console">
+        <div>
+          <p class="eyebrow">Start with your location</p>
+          <h2>Where are you observing from?</h2>
+          <p id="locationHint">Choose country, province/state, and city first. StarScope will rank the best nearby observing windows.</p>
+        </div>
+        <div class="location-controls">
+          <label>Country
+            <select id="countrySelect">
+              <option value="">Select country</option>
+            </select>
+          </label>
+          <label>Province / State
+            <select id="adminAreaSelect" disabled>
+              <option value="">Select province/state</option>
+            </select>
+          </label>
+          <label>City
+            <select id="citySelect" disabled>
+              <option value="">Select city</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="top-picks">
+        <div class="panel-head">
+          <h2>Top 3 Matched Picks</h2>
+          <span>Location weighted</span>
+        </div>
+        <div id="recommendationCards" class="recommendation-cards"></div>
       </section>
 
       <section class="toolbar">
         <label>Sort
           <select id="sortSelect">
-            <option value="risk">Risk Score</option>
-            <option value="wind">Wind Speed</option>
-            <option value="precipitation">Precipitation</option>
-            <option value="temperature">Temperature</option>
+              <option value="matchScore">Best Match</option>
+              <option value="stargazingScore">Stargazing Score</option>
+              <option value="risk">Weather Obstruction</option>
+              <option value="wind">Wind Speed</option>
+              <option value="precipitation">Precipitation</option>
+              <option value="temperature">Temperature</option>
           </select>
         </label>
-        <label>Risk Band
+        <label>Viewing Band
           <select id="riskSelect">
             <option value="All">All</option>
-            <option value="Critical">Critical</option>
-            <option value="High">High</option>
-            <option value="Guarded">Guarded</option>
-            <option value="Stable">Stable</option>
+            <option value="Prime">Prime</option>
+            <option value="Good">Good</option>
+            <option value="Marginal">Marginal</option>
+            <option value="Poor">Poor</option>
           </select>
         </label>
-        <button id="refreshBtn" type="button">Refresh Live Data</button>
+        <button id="refreshBtn" type="button">Refresh Forecast</button>
         <button id="redTeamBtn" type="button">Red Team</button>
         <p id="statusLine">Waiting for login...</p>
+      </section>
+
+      <section class="sky-panel">
+        <div class="sky-copy">
+          <p class="eyebrow">Interactive constellation dome</p>
+          <h2>3D Night Sky Map</h2>
+          <p>Drag to rotate the dome. The constellations use relative display sizes, so large sky patterns appear larger than compact targets. Select one to open its observing notes.</p>
+          <div id="constellationInfo" class="constellation-info">
+            <strong>Orion</strong>
+            <span>Select a constellation to view its observing notes.</span>
+          </div>
+        </div>
+        <div class="sky-stage">
+          <canvas id="starDome"></canvas>
+          <div id="constellationButtons" class="constellation-buttons"></div>
+        </div>
       </section>
 
       <section class="grid">
         <div class="panel wide">
           <div class="panel-head">
-            <h2>Live City Nodes</h2>
+            <h2>Recommended Observation Sites</h2>
             <span id="recordCount">0 records</span>
           </div>
           <div class="table-wrap">
@@ -84,8 +149,8 @@
                   <th>#</th>
                   <th>City</th>
                   <th>Type</th>
-                  <th>Band</th>
-                  <th>Risk</th>
+                  <th>Viewing</th>
+                  <th>Score</th>
                   <th>Temp</th>
                   <th>Wind</th>
                   <th>Rain</th>
@@ -98,7 +163,7 @@
 
         <aside class="panel">
           <div class="panel-head">
-            <h2>Region Matrix</h2>
+            <h2>Sky Quality Matrix</h2>
             <span>2D array</span>
           </div>
           <div id="matrixList" class="matrix-list"></div>
@@ -127,11 +192,15 @@
           <h2>Student Analyst View</h2>
           <span>Read-only</span>
         </div>
-        <p>Analysts can inspect live risk nodes, sort/filter the matrix, and run the sanitizer demo. Admin-only audit logs are hidden.</p>
+        <p>Analysts can inspect live weather-driven stargazing recommendations, sort/filter viewing windows, use the constellation dome, and run the sanitizer demo. Admin-only audit logs are hidden.</p>
+      </section>
+
+      <section id="starsWord" class="stars-word" aria-label="Decorative STARS wordmark">
+        <div id="starsGrid" class="stars-grid" aria-hidden="true"></div>
       </section>
     </main>
   </section>
 
-  <script src="/app.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

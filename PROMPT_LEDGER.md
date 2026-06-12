@@ -162,6 +162,145 @@ Admin should see audit/security panels; user should see only the analyst dashboa
 
 ---
 
+## Prompt #10 — StarScope Stargazing Pivot + 3D Dome
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Pivot the role-based weather site into @StarScope: Live Stargazing Opportunity Radar.
+Keep the ADMIN features: API health, all observing nodes, red-team/audit log, malicious input blocking, and raw forecast node visibility.
+For USER, show today's weather-driven stargazing recommendations instead of campus risk language.
+Add a 3D star dome like an observation app: a large sky hemisphere with constellation positions, lines, and clickable explanations.
+Use the live weather backend to calculate stargazing score and viewing advice.
+Keep login, hashed passwords, sessions, role separation, dynamic data, OOP, custom sorting, and 2D matrix evidence.
+```
+
+**结果：** Rebranded the app as StarScope, added backend stargazing score/advice fields, added `StargazingWindowSorter`, converted the dashboard to viewing bands and best observing sites, and added a Three.js constellation dome with clickable constellation explanations.
+
+---
+
+## Prompt #11 — High-Tech UI Polish
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Improve @web-climate UI so it feels like a high-tech astronomy product, not a plain dashboard.
+Research Trae-style large-letter treatment and dark SaaS visual patterns.
+Add dark/light theme switching.
+Keep constellation geometry white by default; only color and enlarge it on hover or selected state.
+Add a large STARS typography band inspired by high-tech product sites.
+Do not remove the admin audit/red-team features.
+```
+
+**结果：** Added theme toggles, dark/light CSS variables, glassy technical panels, a decorative STARS word band, and constellation hover/selected highlighting with default white constellation lines.
+
+---
+
+## Prompt #12 — Location-Weighted Stargazing Recommendations
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Move the STARS typography band to the bottom of @web-climate/index.html.
+Before showing recommendations, require the user to choose their country and city.
+Use backend latitude/longitude in @ClimateShieldWebMain.java so @web-climate/app.js can rank nearby or same-country observing sites.
+Show only the top 10 matched sites, not all 60 nodes.
+Make the top few matches visually larger and place them before the table.
+```
+
+**结果：** Added country/city selection, latitude/longitude API fields, location-weighted match scoring, Top 3 recommendation cards, a Top 10 matched table, and moved the STARS band to the bottom of the page.
+
+---
+
+## Prompt #13 — Backend Signup + Trae-Style STARS Tiles
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Add a signup UI and backend signup endpoint.
+Store signup data in YAML, but do not leak plaintext passwords.
+Use encryption-style protection: per-user salt plus PBKDF2-HMAC-SHA256 password hashes.
+JS should call backend APIs to confirm login/signup instead of checking passwords locally.
+Rebuild the bottom STARS section to mimic the Trae-style block-letter interaction:
+black background, blue rectangular tiles, letters normally subtle, mouse hover causes nearby rectangles to slide horizontally with distance falloff.
+```
+
+**结果：** Added `/api/signup`, YAML-backed user persistence in `data/users.yml`, salted PBKDF2 password hashes, auth mode tabs, and a tile-based interactive STARS wordmark with mouse-distance motion.
+
+---
+
+## Prompt #14 — Educational Constellation Dome
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Improve @web-climate/app.js constellation dome so it has real educational value.
+Add more constellations instead of only a few examples.
+Make constellation display sizes less uniform by using relative scale values.
+When a constellation is selected, show season, hemisphere, best months, key stars, relative size, and a science explanation.
+Keep the default white constellation styling and hover/selected color highlight.
+```
+
+**结果：** Expanded the dome to 12 constellations, added relative size scaling, variable marker sizes, scrollable constellation controls, and an educational detail panel for each selected constellation.
+
+---
+
+## Prompt #15 — Country / Province / City Location Hierarchy
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Improve @ClimateDataScraper.java and @web-climate/app.js so locations are not just a tiny flat city list.
+The user should choose Country first, then a province/state/admin area, then a city.
+Make China and the United States much more detailed, with curated province/state-level observing nodes.
+Expose adminArea from @ClimateShieldWebMain.java JSON and use it in the recommendation algorithm.
+Keep recommendations limited to the best 10, but rank same-province/state locations before expanding to same-country matches.
+Do not break the login, admin audit, red-team, theme, or constellation dome features.
+```
+
+**结果：** Added `adminArea` to Java climate nodes and API JSON, expanded the curated China/US observing-site seed set, changed the UI to Country -> Province/State -> City, and updated location matching to prioritize same administrative area before same-country results.
+
+---
+
+## Prompt #16 — Signup Password Policy
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Update @AuthService.java and @web-climate/app.js so signup passwords cannot be weak.
+Require every new signup password to be at least 6 characters and include both letters and numbers.
+Reject invalid passwords in the Java backend, not only in the browser.
+Show the password rule on @web-climate/index.html during signup.
+Keep PBKDF2 password hashing and YAML user storage unchanged.
+```
+
+**结果：** Added backend password-policy validation, frontend signup pre-checks, a visible signup password rule, and friendly error messages for rejected weak passwords.
+
+---
+
+## Prompt #17 — High-Contrast Interactive STARS Wordmark
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Improve the bottom @web-climate STARS wordmark because the letters are not readable enough.
+Use the TRAE-style reference: huge high-contrast block letters, neon background, and rectangular chunks that slide apart when the mouse drags across the word.
+Do not keep the low-resolution 5x9 pixel letters.
+Make the letters clear before interaction, then add stronger drag/glitch motion around the pointer.
+```
+
+**结果：** Replaced the small manual pixel alphabet with canvas-sampled high-resolution STARS tiles, changed the section to a neon green field with black block-letter tiles, and added pointer-drag distortion with distance falloff.
+
+---
+
 ## 错误 Prompt 记录（反面教材）
 
 | # | 错误 Prompt | 为什么失败 |
