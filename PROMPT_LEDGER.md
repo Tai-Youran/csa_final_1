@@ -126,6 +126,42 @@ Do not introduce JUnit or new dependencies.
 
 ---
 
+## Prompt #8 — Java-Powered Web UI
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Add a browser-based UI without deleting the existing terminal app.
+Use Java's built-in HTTP server in @WebMain.java; do not add Spring Boot or new dependencies.
+Expose @HackerNewsScraper.java data through /api/articles and @InputSanitizer.java through /api/red-team.
+Create @web/index.html, @web/styles.css, and @web/app.js for a minimalist editorial dashboard.
+Keep the Java scraper, OOP model hierarchy, custom Selection Sort, and 2D matrix as the backend source of truth.
+```
+
+**结果：** Added a Java-backed web dashboard at `http://localhost:8080` with live article ranking, category matrix, refresh controls, and red-team defense output.
+
+---
+
+## Prompt #9 — ClimateShield Role-Based Backend
+
+**日期：** 2026-06-12
+
+**Prompt：**
+```
+Pitch and implement a more complex final-project theme than live news.
+Create @ClimateShieldWebMain.java as a Java backend web app with login and role-based pages.
+Do not store plaintext passwords; use SHA-256 password hashes and session cookies.
+Use live API acquisition instead of hardcoded data: geocode city nodes dynamically, then fetch current weather for 60+ nodes.
+Create OOP classes under @climate/model: abstract ClimateData plus Urban, Coastal, and Highland node subclasses.
+Create custom Selection Sort and a 2D region risk matrix under @climate/algorithm.
+Admin should see audit/security panels; user should see only the analyst dashboard.
+```
+
+**结果：** Added ClimateShield, a role-based climate risk web app at `http://localhost:8090` with live Open-Meteo data, hashed login, admin/user separation, custom risk sorting, 2D region matrix, and sanitizer-based red-team demo.
+
+---
+
 ## 错误 Prompt 记录（反面教材）
 
 | # | 错误 Prompt | 为什么失败 |

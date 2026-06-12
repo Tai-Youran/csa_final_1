@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClimateShield Risk Radar</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <section id="loginView" class="login-shell">
+    <div class="login-copy">
+      <p class="eyebrow">Global campus safety intelligence</p>
+      <h1>ClimateShield</h1>
+      <p class="lede">Live weather risk scoring for student travel, school operations, and emergency planning.</p>
+    </div>
+    <form id="loginForm" class="login-card">
+      <h2>Secure Login</h2>
+      <label>Username <input name="username" autocomplete="username" required></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">Enter Dashboard</button>
+      <p id="loginError" class="error"></p>
+      <div class="demo">
+        <strong>Demo accounts</strong>
+        <span>admin / GridAdmin2026!</span>
+        <span>analyst / StudentRadar2026!</span>
+      </div>
+    </form>
+  </section>
+
+  <section id="appView" class="app hidden">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ClimateShield Risk Radar</p>
+        <h1>Global Safety Matrix</h1>
+      </div>
+      <div class="user-box">
+        <span id="roleBadge">ROLE</span>
+        <strong id="usernameLabel">user</strong>
+        <button id="logoutBtn" type="button">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="metrics">
+        <div><span>Live Nodes</span><strong id="nodeCount">--</strong></div>
+        <div><span>Geocoded Pool</span><strong id="geoCount">--</strong></div>
+        <div><span>Critical Nodes</span><strong id="criticalCount">--</strong></div>
+        <div><span>Lead Risk</span><strong id="leadRisk">Loading...</strong></div>
+      </section>
+
+      <section class="toolbar">
+        <label>Sort
+          <select id="sortSelect">
+            <option value="risk">Risk Score</option>
+            <option value="wind">Wind Speed</option>
+            <option value="precipitation">Precipitation</option>
+            <option value="temperature">Temperature</option>
+          </select>
+        </label>
+        <label>Risk Band
+          <select id="riskSelect">
+            <option value="All">All</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Guarded">Guarded</option>
+            <option value="Stable">Stable</option>
+          </select>
+        </label>
+        <button id="refreshBtn" type="button">Refresh Live Data</button>
+        <button id="redTeamBtn" type="button">Red Team</button>
+        <p id="statusLine">Waiting for login...</p>
+      </section>
+
+      <section class="grid">
+        <div class="panel wide">
+          <div class="panel-head">
+            <h2>Live City Nodes</h2>
+            <span id="recordCount">0 records</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>City</th>
+                  <th>Type</th>
+                  <th>Band</th>
+                  <th>Risk</th>
+                  <th>Temp</th>
+                  <th>Wind</th>
+                  <th>Rain</th>
+                </tr>
+              </thead>
+              <tbody id="nodeBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-head">
+            <h2>Region Matrix</h2>
+            <span>2D array</span>
+          </div>
+          <div id="matrixList" class="matrix-list"></div>
+        </aside>
+      </section>
+
+      <section id="adminPanel" class="panel admin hidden">
+        <div class="panel-head">
+          <h2>Admin Operations</h2>
+          <span>Restricted</span>
+        </div>
+        <div class="admin-grid">
+          <div>
+            <h3>System Audit</h3>
+            <div id="auditList" class="audit-list"></div>
+          </div>
+          <div>
+            <h3>Red Team Output</h3>
+            <div id="defenseList" class="defense-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="userPanel" class="panel user-panel hidden">
+        <div class="panel-head">
+          <h2>Student Analyst View</h2>
+          <span>Read-only</span>
+        </div>
+        <p>Analysts can inspect live risk nodes, sort/filter the matrix, and run the sanitizer demo. Admin-only audit logs are hidden.</p>
+      </section>
+    </main>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>

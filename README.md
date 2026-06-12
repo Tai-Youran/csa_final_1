@@ -1,8 +1,54 @@
 # PulseWire
 
-PulseWire is a Java industrial terminal application that live-scrapes 50+ Hacker News posts, converts raw HTML into object-oriented Java models, ranks the results with custom algorithms, and displays the data in a polished terminal UI.
+## Recommended Final Version: ClimateShield
 
-This project follows Track B: Silicon Valley Sentiment Tracker, Option 1: Industrial Terminal UI.
+ClimateShield is the more advanced final-project direction in this repo. It is a Java backend web app with login, roles, live dynamic data, OOP models, custom algorithms, a 2D matrix, and red-team defense.
+
+Theme: **Global Campus Safety & Climate Risk Radar**
+
+Live data flow:
+
+1. The backend dynamically calls Open-Meteo's geocoding API to collect city nodes.
+2. The backend calls Open-Meteo's forecast API to fetch current weather for 60+ live nodes.
+3. Java converts those raw API records into polymorphic `ClimateData` objects.
+4. A custom Selection Sort ranks nodes by climate risk.
+5. A 2D region matrix summarizes count, average risk, average wind, max risk, and precipitation.
+6. A login system separates `ADMIN` and `USER` views.
+
+### Open ClimateShield
+
+```bash
+cd /Users/peanut/Downloads/csa_final_1-main
+rm -rf out
+mkdir -p out
+javac -cp lib/jsoup-1.17.2.jar -d out $(find src -name '*.java')
+java -cp out:lib/jsoup-1.17.2.jar ClimateShieldWebMain
+```
+
+Then open:
+
+```text
+http://localhost:8090
+```
+
+Demo accounts:
+
+```text
+Admin:   admin   / GridAdmin2026!
+User:    analyst / StudentRadar2026!
+```
+
+The backend does not store plaintext passwords. It stores SHA-256 hashes and creates session cookies after login.
+
+Admin can see the restricted audit panel. User can see the live dashboard but cannot access admin audit logs.
+
+---
+
+## Older Version: PulseWire
+
+PulseWire is a Java live tech sentiment application that scrapes 50+ Hacker News posts, converts raw HTML into object-oriented Java models, ranks the results with custom algorithms, and displays the data through either a terminal UI or a browser-based web dashboard.
+
+This project follows Track B: Silicon Valley Sentiment Tracker. It now supports both Option 1, an Industrial Terminal UI, and Option 2, a Java-powered web app.
 
 ## What It Does
 
@@ -13,17 +59,26 @@ This project follows Track B: Silicon Valley Sentiment Tracker, Option 1: Indust
 - Sorts results with hand-written Selection Sort.
 - Builds a 2D category heat matrix.
 - Blocks suspicious user input through `InputSanitizer`.
-- Shows everything inside a terminal-based industrial data dashboard.
+- Shows everything inside either a terminal-based industrial dashboard or a minimalist editorial web dashboard.
 
-## Is This a Terminal UI?
+## UI Options
 
-Yes. This is a pure Java terminal application.
+There are two ways to present the project.
 
-It does not open a browser window and it does not use HTML/CSS as a frontend. The "UI" is the styled console output printed by Java: dashboard panels, aligned tables, box borders, menus, category matrix, and red-team defense output.
+### Option 1: Terminal UI
 
-That matches the assignment's Option 1: a Java-based application with an Industrial Terminal UI.
+`Main.java` starts the original Java terminal app. It prints dashboard panels, aligned tables, box borders, menus, a category matrix, and red-team defense output directly inside Terminal.
 
-## How To Open The UI
+### Option 2: Web UI
+
+`WebMain.java` starts a tiny Java HTTP server. The browser UI loads live data from Java endpoints:
+
+- `/api/articles` scrapes live Hacker News data and returns ranked JSON.
+- `/api/red-team` runs attack payloads through `InputSanitizer`.
+
+The web frontend is in the `web/` folder, but the live data and security logic still come from the Java backend.
+
+## How To Open The Terminal UI
 
 Open Terminal, go into the project folder, compile the Java files, then run `Main`.
 
@@ -36,6 +91,26 @@ java -cp out:lib/jsoup-1.17.2.jar Main
 ```
 
 After it starts, the app will fetch live Hacker News data and print the PulseWire terminal dashboard.
+
+## How To Open The Web UI
+
+Open Terminal, go into the project folder, compile the Java files, then run `WebMain`.
+
+```bash
+cd /Users/peanut/Downloads/csa_final_1-main
+rm -rf out
+mkdir -p out
+javac -cp lib/jsoup-1.17.2.jar -d out $(find src -name '*.java')
+java -cp out:lib/jsoup-1.17.2.jar WebMain
+```
+
+Then open this URL in a browser:
+
+```text
+http://localhost:8080
+```
+
+Keep the Terminal window running while using the web UI. Press `Ctrl+C` in Terminal to stop the server.
 
 ## Menu Options
 
@@ -80,6 +155,7 @@ ProjectSmokeTest passed.
 ```text
 src/
 ├── Main.java
+├── WebMain.java
 ├── model/
 │   ├── WebData.java
 │   ├── TechNewsArticle.java
@@ -99,6 +175,10 @@ src/
 │   └── SecurityViolationException.java
 └── ui/
     └── TerminalRenderer.java
+web/
+├── index.html
+├── styles.css
+└── app.js
 ```
 
 ## Final Project Evidence
@@ -106,6 +186,6 @@ src/
 - Dynamic Data Acquisition: `HackerNewsScraper` uses Jsoup to fetch live data.
 - Object-Oriented Architecture: `WebData` is abstract; `TechNewsArticle` and `ShowHNPost` override behavior.
 - Algorithmic Processing: `HypeScoreSorter` uses custom Selection Sort; `CategoryMatrixBuilder` uses a 2D array.
-- Aesthetic Output: `TerminalRenderer` prints the industrial terminal dashboard.
+- Aesthetic Output: `TerminalRenderer` prints the industrial terminal dashboard; `web/` provides the browser dashboard.
 - AI Defense: `InputSanitizer` blocks prompt injection, script tags, SQL-like payloads, and overlong input.
 - Vibe Coding Mastery: `PROMPT_LEDGER.md` documents architecture-first prompts.
