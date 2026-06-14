@@ -134,6 +134,14 @@
         <p id="statusLine">等待登录…</p>
       </section>
 
+      <section id="defensePanel" class="panel defense-panel">
+        <div class="panel-head">
+          <h2 data-i18n="defenseTitle">输入安全测试</h2>
+          <span data-i18n="defenseTag">InputSanitizer</span>
+        </div>
+        <div id="defenseList" class="defense-list"></div>
+      </section>
+
       <section class="sky-panel">
         <div class="sky-copy">
           <p class="eyebrow" data-i18n="domeEyebrow">交互式星座穹顶</p>
@@ -195,10 +203,6 @@
             <h3>System Audit</h3>
             <div id="auditList" class="audit-list"></div>
           </div>
-          <div>
-            <h3>Red Team Output</h3>
-            <div id="defenseList" class="defense-list"></div>
-          </div>
         </div>
       </section>
 
@@ -219,3 +223,4 @@
   <script type="module" src="/app.js"></script>
 </body>
 </html>
+
