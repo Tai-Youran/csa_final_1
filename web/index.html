@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseWire Live Tech Sentiment</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Live Hacker News Intelligence</p>
+      <h1>PulseWire</h1>
+    </div>
+    <div class="actions">
+      <button id="refreshBtn" type="button">Refresh</button>
+      <button id="redTeamBtn" type="button">Red Team</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="dashboard" aria-label="Live metrics">
+      <div class="metric">
+        <span>Nodes</span>
+        <strong id="nodeCount">--</strong>
+      </div>
+      <div class="metric">
+        <span>AI Signals</span>
+        <strong id="aiSignals">--</strong>
+      </div>
+      <div class="metric">
+        <span>Avg Impact</span>
+        <strong id="avgImpact">--</strong>
+      </div>
+      <div class="metric wide">
+        <span>Lead Signal</span>
+        <strong id="leadSignal">Loading live data...</strong>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Data controls">
+      <label>
+        Sort
+        <select id="sortSelect">
+          <option value="impact">Impact</option>
+          <option value="points">Points</option>
+          <option value="comments">Comments</option>
+          <option value="hype">Hype</option>
+        </select>
+      </label>
+      <label>
+        Category
+        <select id="categorySelect">
+          <option value="All">All</option>
+          <option value="AI">AI</option>
+          <option value="Layoffs">Layoffs</option>
+          <option value="Funding">Funding</option>
+          <option value="Show HN">Show HN</option>
+          <option value="General">General</option>
+        </select>
+      </label>
+      <p id="statusLine" class="status">Connecting to Java backend...</p>
+    </section>
+
+    <section class="split">
+      <div class="panel table-panel">
+        <div class="panel-head">
+          <h2>Ranked Articles</h2>
+          <span id="recordCount">0 records</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Headline</th>
+                <th>Category</th>
+                <th>Points</th>
+                <th>Comments</th>
+                <th>Hype</th>
+                <th>Impact</th>
+              </tr>
+            </thead>
+            <tbody id="articleBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <h2>Category Matrix</h2>
+          <span>2D array</span>
+        </div>
+        <div id="matrixList" class="matrix-list"></div>
+      </aside>
+    </section>
+
+    <section class="panel defense-panel">
+      <div class="panel-head">
+        <h2>Defense Console</h2>
+        <span>InputSanitizer</span>
+      </div>
+      <div id="defenseList" class="defense-list">
+        <p>Press Red Team to run attack payloads through the Java sanitizer.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
