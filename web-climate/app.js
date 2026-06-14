@@ -35,6 +35,8 @@ const I18N = {
     sortWind: "风速", sortRain: "降水量", sortTemp: "温度",
     bandAll: "全部", bandPrime: "极佳", bandGood: "良好", bandMarginal: "一般", bandPoor: "较差",
     btnRefresh: "刷新预报", btnRedTeam: "红队测试",
+    defenseTitle: "输入安全测试", defenseTag: "InputSanitizer",
+    defenseEmpty: "点击上方「红队测试」查看 InputSanitizer 拦截结果。",
     domeEyebrow: "交互式星座穹顶", domeTitle: "3D 夜空地图",
     domeDesc: "拖动旋转穹顶。星座按相对大小显示，点击可查看观测说明。",
     tableTitle: "推荐观测点", thSite: "地点", thType: "类型", thViewing: "等级",
@@ -83,6 +85,8 @@ const I18N = {
     sortWind: "Wind Speed", sortRain: "Precipitation", sortTemp: "Temperature",
     bandAll: "All", bandPrime: "Prime", bandGood: "Good", bandMarginal: "Marginal", bandPoor: "Poor",
     btnRefresh: "Refresh Forecast", btnRedTeam: "Red Team",
+    defenseTitle: "Input Security Demo", defenseTag: "InputSanitizer",
+    defenseEmpty: "Click Red Team above to run canned payloads through InputSanitizer.",
     domeEyebrow: "Interactive constellation dome", domeTitle: "3D Night Sky Map",
     domeDesc: "Drag to rotate the dome. Constellations scale by size — click for observing notes.",
     tableTitle: "Recommended Observation Sites", thSite: "Site", thType: "Type", thViewing: "Viewing",
@@ -200,6 +204,7 @@ const els = {
   matrixLegend: $("#matrixLegend"),
   adminPanel: $("#adminPanel"),
   userPanel: $("#userPanel"),
+  defensePanel: $("#defensePanel"),
   auditList: $("#auditList"),
   defenseList: $("#defenseList"),
   constellationInfo: $("#constellationInfo"),
@@ -615,6 +620,9 @@ function showApp() {
   els.roleBadge.textContent = state.user.role;
   els.adminPanel.classList.toggle("hidden", state.user.role !== "ADMIN");
   els.userPanel.classList.toggle("hidden", state.user.role === "ADMIN");
+  if (!els.defenseList.children.length) {
+    els.defenseList.innerHTML = `<p class="defense-empty">${escapeHtml(t("defenseEmpty"))}</p>`;
+  }
   requestAnimationFrame(initStarDome);
 }
 
@@ -1125,6 +1133,7 @@ async function runRedTeam() {
   });
   if (state.user.role === "ADMIN") await loadAudit();
   setStatus(t("statusRedTeam"));
+  els.defensePanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function initStarDome() {
