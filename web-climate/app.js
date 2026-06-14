@@ -58,7 +58,10 @@ const I18N = {
     moonNew: "新月", moonWax: "盈月", moonFull: "满月", moonWan: "亏月",
     strengthWeak: "弱", strengthMedium: "中", strengthStrong: "强",
     legendPoor: "较差", legendMid: "一般", legendGood: "良好", legendPrime: "极佳",
-    matrixSky: "天空分", matrixWind: "均风", matrixRisk: "阻碍"
+    matrixSky: "天空分", matrixWind: "均风", matrixRisk: "阻碍",
+    cMetaSeason: "季节", cMetaHemisphere: "半球", cMetaBestMonths: "最佳月份",
+    cMetaKeyStars: "主要恒星", cMetaRelativeSize: "相对大小", cSelectHint: "点击星座查看观测说明",
+    cSizeScale: "倍穹顶比例"
   },
   en: {
     loginEyebrow: "Live astronomy planning intelligence",
@@ -103,7 +106,10 @@ const I18N = {
     moonNew: "New moon", moonWax: "Waxing", moonFull: "Full moon", moonWan: "Waning",
     strengthWeak: "Weak", strengthMedium: "Medium", strengthStrong: "Strong",
     legendPoor: "Poor", legendMid: "Marginal", legendGood: "Good", legendPrime: "Prime",
-    matrixSky: "sky", matrixWind: "wind", matrixRisk: "risk"
+    matrixSky: "sky", matrixWind: "wind", matrixRisk: "risk",
+    cMetaSeason: "Season", cMetaHemisphere: "Hemisphere", cMetaBestMonths: "Best months",
+    cMetaKeyStars: "Key stars", cMetaRelativeSize: "Relative size", cSelectHint: "Select a constellation to view its observing notes",
+    cSizeScale: "x dome scale"
   }
 };
 
@@ -134,6 +140,15 @@ function applyI18n() {
   renderMatrixLegend();
   if (state.nodes.length) renderNodes();
   if (!state.user && els.statusLine) els.statusLine.textContent = t("statusWait");
+  constellationButtons();
+  if (state.selectedConstellation) {
+    selectConstellation(state.selectedConstellation);
+  } else if (els.constellationInfo) {
+    els.constellationInfo.innerHTML = `
+      <strong>Orion</strong>
+      <span>${escapeHtml(t("cSelectHint"))}</span>
+    `;
+  }
 }
 
 function toggleLang() {
@@ -387,6 +402,91 @@ const constellations = [
     lines: [[0, 1], [2, 3]]
   })
 ];
+
+const CONSTELLATION_I18N = {
+  Orion: {
+    name: "猎户座",
+    story: "猎户座是最适合初学者的目标之一。腰带三颗星排成直线，腰带下方可见猎户座大星云。",
+    science: "可用猎户座讲解恒星颜色：红色参宿四与蓝色参宿七代表不同恒星温度。",
+    season: "冬季", hemisphere: "南北半球均可", bestMonths: "12 月 – 2 月", keyStars: "参宿四、参宿七、参宿五"
+  },
+  "Ursa Major": {
+    name: "大熊座",
+    story: "大熊座包含北斗七星。勺口外侧两颗指极星可用于寻找北极星。",
+    science: "适合讲解导航：可用天枢、天璇作为指极星找到北方。",
+    season: "春季", hemisphere: "北半球", bestMonths: "3 月 – 6 月", keyStars: "天枢、天璇、玉衡、开阳"
+  },
+  Cassiopeia: {
+    name: "仙后座",
+    story: "仙后座呈紧凑的 W 形，与北斗七星围绕北极星相对分布。",
+    science: "当大熊座位置较低时，W 形有助于在北天保持方向感。",
+    season: "秋季", hemisphere: "北半球", bestMonths: "9 月 – 11 月", keyStars: "王良四、阁道三、阁道二"
+  },
+  Scorpius: {
+    name: "天蝎座",
+    story: "天蝎座有弯曲的长尾，心宿二这颗明亮红星位于“心脏”位置。",
+    science: "心宿二是红超巨星。该星座地平线较低，雾霾和地平线云影响很大。",
+    season: "夏季", hemisphere: "南半球 / 低纬度北半球", bestMonths: "6 月 – 8 月", keyStars: "心宿二、尾宿八、尾宿五"
+  },
+  Cygnus: {
+    name: "天鹅座",
+    story: "天鹅座形成北十字，沿银河分布，暗空下尤其壮观。",
+    science: "天津四是夏季大三角的顶点之一，另外两颗是织女星和牛郎星。",
+    season: "夏季", hemisphere: "北半球", bestMonths: "7 月 – 9 月", keyStars: "天津四、天津一、辇道增七"
+  },
+  Leo: {
+    name: "狮子座",
+    story: "狮子座以镰刀形头部和亮星轩辕十四为标志。",
+    science: "狮子座是春季观测好目标，有助于介绍黄道——太阳、月亮和行星看似经过的路径。",
+    season: "春季", hemisphere: "以北半球为佳", bestMonths: "3 月 – 5 月", keyStars: "轩辕十四、五帝座一、轩辕十二"
+  },
+  Taurus: {
+    name: "金牛座",
+    story: "金牛座包含 V 形的毕宿星团，附近还有昴宿星团。",
+    science: "毕宿五看似在毕宿星团前方，实际上并非该星团成员。",
+    season: "冬季", hemisphere: "南北半球均可", bestMonths: "11 月 – 2 月", keyStars: "毕宿五、五车五、毕宿星团"
+  },
+  Gemini: {
+    name: "双子座",
+    story: "双子座有两条近乎平行的星链，象征双胞胎北河二与北河三。",
+    science: "北河二实际上是聚星系统，适合讲解双星与聚星概念。",
+    season: "冬季", hemisphere: "北半球", bestMonths: "12 月 – 3 月", keyStars: "北河二、北河三、井宿三"
+  },
+  Lyra: {
+    name: "天琴座",
+    story: "天琴座虽小，但拥有织女星——天空中最亮的恒星之一。",
+    science: "织女星是夏季大三角成员，曾用作测量恒星亮度的标准星。",
+    season: "夏季", hemisphere: "北半球", bestMonths: "6 月 – 9 月", keyStars: "织女星、渐台二、渐台一"
+  },
+  Aquila: {
+    name: "天鹰座",
+    story: "天鹰座包含牛郎星，是夏季大三角的又一顶点。",
+    science: "牛郎星自转极快，因此呈扁球形而非完美球体。",
+    season: "夏季", hemisphere: "南北半球均可", bestMonths: "7 月 – 9 月", keyStars: "牛郎星、河鼓一、河鼓二"
+  },
+  Pegasus: {
+    name: "飞马座",
+    story: "飞马座以飞马大四边形著称，是秋季标志性星群。",
+    science: "大四边形可作为天空标尺，帮助学生理解角距离概念。",
+    season: "秋季", hemisphere: "北半球", bestMonths: "9 月 – 11 月", keyStars: "室宿一、壁宿二、室宿二、壁宿一"
+  },
+  Crux: {
+    name: "南十字座",
+    story: "南十字座虽小，却是南天最具代表性的星座之一。",
+    science: "南半球观测者常用南十字座及附近指极星估算南天极方向。",
+    season: "秋季 / 南半球", hemisphere: "南半球", bestMonths: "4 月 – 6 月", keyStars: "十字架二、十字架三、十字架一"
+  }
+};
+
+function localizedConstellation(name) {
+  const base = constellations.find(item => item.name === name);
+  if (!base) return null;
+  const zh = CONSTELLATION_I18N[name];
+  if (state.lang === "zh" && zh) {
+    return { ...base, ...zh };
+  }
+  return base;
+}
 
 const LOCAL_OBSERVING_SITES = {
   "China|Shanghai|Shanghai": [
@@ -1150,31 +1250,33 @@ function initStarDome() {
 function constellationButtons() {
   els.constellationButtons.innerHTML = "";
   constellations.forEach(constellation => {
+    const copy = localizedConstellation(constellation.name);
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = constellation.name;
+    button.dataset.constellationId = constellation.name;
+    button.textContent = copy.name;
     button.addEventListener("click", () => selectConstellation(constellation.name));
     els.constellationButtons.appendChild(button);
   });
 }
 
 function selectConstellation(name) {
-  const constellation = constellations.find(item => item.name === name);
+  const constellation = localizedConstellation(name);
   if (!constellation) return;
   state.selectedConstellation = name;
   highlightConstellation(name);
   [...els.constellationButtons.querySelectorAll("button")].forEach(button => {
-    button.classList.toggle("is-active", button.textContent === name);
+    button.classList.toggle("is-active", button.dataset.constellationId === name);
   });
   els.constellationInfo.innerHTML = `
     <strong>${escapeHtml(constellation.name)}</strong>
     <span>${escapeHtml(constellation.story)}</span>
     <div class="constellation-meta">
-      <div><b>Season</b><em>${escapeHtml(constellation.season)}</em></div>
-      <div><b>Hemisphere</b><em>${escapeHtml(constellation.hemisphere)}</em></div>
-      <div><b>Best months</b><em>${escapeHtml(constellation.bestMonths)}</em></div>
-      <div><b>Key stars</b><em>${escapeHtml(constellation.keyStars)}</em></div>
-      <div><b>Relative size</b><em>${constellation.size.toFixed(1)}x dome scale</em></div>
+      <div><b>${escapeHtml(t("cMetaSeason"))}</b><em>${escapeHtml(constellation.season)}</em></div>
+      <div><b>${escapeHtml(t("cMetaHemisphere"))}</b><em>${escapeHtml(constellation.hemisphere)}</em></div>
+      <div><b>${escapeHtml(t("cMetaBestMonths"))}</b><em>${escapeHtml(constellation.bestMonths)}</em></div>
+      <div><b>${escapeHtml(t("cMetaKeyStars"))}</b><em>${escapeHtml(constellation.keyStars)}</em></div>
+      <div><b>${escapeHtml(t("cMetaRelativeSize"))}</b><em>${constellation.size.toFixed(1)}${t("cSizeScale")}</em></div>
     </div>
     <p>${escapeHtml(constellation.science)}</p>
   `;
