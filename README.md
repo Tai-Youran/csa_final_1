@@ -15,9 +15,9 @@ Live data flow:
 5. A 2D region matrix summarizes count, sky quality, average wind, obstruction risk, and precipitation.
 6. A login system separates `ADMIN` and `USER` views.
 7. The user dashboard requires a country -> province/state -> city selection before recommendations. China and the United States include detailed province/state-level location options.
-8. The recommendation engine uses the selected city's live weather as the dynamic baseline, then ranks local observing sites inside that city instead of recommending other cities.
-9. The user dashboard includes a Three.js-style 3D constellation dome with 12 educational constellations, clickable observing notes, seasons, hemispheres, key stars, and relative display sizes.
-10. The interface supports dark and light themes, white default constellation lines, hover/selected constellation highlighting, and a large decorative `STARS` wordmark.
+8. The recommendation engine uses the selected city's live weather as the dynamic baseline, then ranks local observing sites inside that city (e.g., curated Shanghai local spots like Dishui Lake and Dongtan Wetland).
+9. The user dashboard includes a Three.js-style 3D constellation dome with 12 educational constellations distributed across realistic approximate sky azimuth and altitude, featuring clickable observing notes, seasons, hemispheres, key stars, and relative display sizes.
+10. The interface supports dark and light themes, white default constellation lines, hover/selected constellation highlighting, and a highly interactive, Trae-style high-contrast `STARS` wordmark with pointer-drag glitch motion.
 11. Signup is handled by the Java backend. New accounts are written to `data/users.yml` with salted PBKDF2 hashes, not plaintext passwords.
 12. Signup passwords must be at least 6 characters and include both letters and numbers. The frontend explains the rule, and the backend rejects weak passwords even if someone bypasses the UI.
 
