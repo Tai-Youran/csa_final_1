@@ -318,6 +318,23 @@ Keep the dashboard, login, admin, red-team, and dynamic weather scraper intact.
 
 ---
 
+## Prompt #19 — Spread Constellations Across The Dome
+
+**日期：** 2026-06-15
+
+**Prompt：**
+```
+Fix @web-climate/app.js constellation dome positions.
+The constellations visually appear on the same side of the dome, which makes the sky map look incorrect.
+Keep this as an educational interactive dome, not a real-time astronomical RA/Dec projection.
+Distribute constellation centers across approximate sky azimuth and altitude so the dome looks like a full sky instead of one clustered patch.
+Update UI copy so it honestly says approximate educational sky direction.
+```
+
+**结果：** Added a `skyCenter(azimuth, altitude)` helper, moved all constellation centers from one negative-z cluster into a wider dome distribution, and clarified the dome as an educational approximate sky map.
+
+---
+
 ## 错误 Prompt 记录（反面教材）
 
 | # | 错误 Prompt | 为什么失败 |

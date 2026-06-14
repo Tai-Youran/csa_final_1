@@ -9,6 +9,9 @@ const state = {
   selectedCountry: "",
   selectedAdminArea: "",
   selectedCity: "",
+  applications: [],
+  approvedSites: [],
+  currentView: "dashboard",
   lang: localStorage.getItem("starscope-lang") || "zh"
 };
 
@@ -19,29 +22,64 @@ const I18N = {
     loginEyebrow: "实时天文观测规划",
     loginLede: "基于角色的观星雷达，把实时天气转化为今晚最佳观测窗口。",
     heroWeather: "动态天气", heroRoles: "角色权限", heroDome: "3D 星座穹顶",
+    themeLight: "浅色", themeDark: "深色", themeAria: "切换主题",
+    roleAdmin: "管理员", roleUser: "用户",
+    navDashboard: "观测台", navProfile: "个人主页",
     tabLogin: "登录", tabSignup: "注册", authLogin: "安全登录", authSignup: "创建账号",
     labelUsername: "用户名", labelPassword: "密码", labelConfirm: "确认密码",
     passwordRule: "密码至少 6 位，且同时包含字母和数字。",
+    errPasswordRule: "密码至少 6 位，并且必须同时包含字母和数字。",
+    errPasswordMismatch: "两次输入的密码不一致。",
+    errUsernameRule: "用户名必须为 3-20 位，只能包含字母、数字或下划线。",
+    errUsernameExists: "该用户名已存在。",
+    errInvalidCredentials: "用户名或密码错误。",
     btnEnter: "进入仪表盘", btnSignup: "创建普通用户", btnLogout: "退出",
-    demoTitle: "演示账号", demoNote: "新注册用户默认为普通用户。",
     appEyebrow: "StarScope 观测雷达", appTitle: "今晚观星窗口",
     metricNodes: "预报节点", metricGeo: "地理编码池", metricPrime: "优质窗口", metricBest: "今晚最佳",
     locEyebrow: "从位置开始", locTitle: "你在哪里观测？",
     labelCountry: "国家", labelAdmin: "省 / 州", labelCity: "城市",
     optCountry: "选择国家", optAdmin: "选择省/州", optCity: "选择城市",
-    topPicks: "本地 Top 3 推荐", topPicksTag: "同城",
+    topPicks: "本地前三推荐", topPicksTag: "同城",
     labelSort: "排序", labelBand: "观星等级",
     sortMatch: "最佳匹配", sortScore: "观星评分", sortRisk: "天气阻碍",
     sortWind: "风速", sortRain: "降水量", sortTemp: "温度",
     bandAll: "全部", bandPrime: "极佳", bandGood: "良好", bandMarginal: "一般", bandPoor: "较差",
-    btnRefresh: "刷新预报", btnRedTeam: "红队测试",
+    btnRefresh: "刷新预报", btnExport: "导出数据", btnRedTeam: "红队测试",
     defenseTitle: "输入安全测试", defenseTag: "InputSanitizer",
     defenseEmpty: "点击上方「红队测试」查看 InputSanitizer 拦截结果。",
+    defenseAllowed: "已允许",
+    defenseBlocked: "已拦截",
     domeEyebrow: "交互式星座穹顶", domeTitle: "3D 夜空地图",
-    domeDesc: "拖动旋转穹顶。星座按相对大小显示，点击可查看观测说明。",
+    domeDesc: "拖动旋转教育星空穹顶。星座按近似全天方位分布并按相对大小显示，点击可查看观测说明。",
     tableTitle: "推荐观测点", thSite: "地点", thType: "类型", thViewing: "等级",
     thScore: "评分", thTemp: "温度", thWind: "风速", thRain: "降水",
     matrixTitle: "天空质量热力图", matrixTag: "2D 矩阵",
+    adminTitle: "管理员控制台", adminTag: "受限访问", adminAudit: "系统审计日志", adminApplications: "地点申请审核",
+    adminReviewTitle: "用户地点草稿审核", adminReviewTag: "同意 / 不同意",
+    adminReviewEmpty: "暂无用户提交的地点草稿。",
+    userTitle: "学生分析视图", userTag: "只读",
+    userNote: "分析员可以查看由实时天气驱动的观星推荐，排序/筛选观测窗口，使用星座穹顶，并运行输入安全演示。管理员专属审计日志会被隐藏。",
+    profileEyebrow: "个人观星档案", profileTitle: "我的 StarScope 空间",
+    profileNote: "管理你的账号信息、地点草稿、审核进程，并把适合观星的地点提交给管理员。",
+    adminProfileEyebrow: "管理员审核台", adminProfileTitle: "用户地点草稿",
+    adminProfileNote: "左侧查看用户提交的观星地点草稿，右侧直接选择同意或不同意。",
+    profileBasic: "基本信息", profileName: "用户名", profileDraftCount: "草稿",
+    profilePendingCount: "审核中", profileApprovedCount: "已通过",
+    applicationTitle: "提交推荐观星点", applicationTag: "模板",
+    appSiteName: "地点名称", appCountry: "国家", appAdmin: "省 / 州", appCity: "城市",
+    appDistrict: "区县 / 位置", appType: "地点类型", appReason: "为什么适合观星",
+    btnSaveDraft: "保存草稿", btnSubmitApplication: "提交审核",
+    draftBox: "草稿箱", draftTag: "未提交", progressBox: "申请进程", progressTag: "审核状态",
+    emptyDrafts: "还没有草稿。填写模板后点击保存草稿。",
+    emptyProgress: "还没有提交审核的地点。",
+    emptyAdminApplications: "暂无待处理申请。",
+    statusDraftSaved: "草稿已保存。",
+    statusSubmitted: "申请已提交给管理员审核。",
+    statusApplicationError: "申请保存失败",
+    statusExporting: "正在导出实时观星数据…",
+    statusExportReady: "CSV 已开始下载。",
+    statusApproved: "已通过", statusRejected: "已拒绝", statusPending: "审核中", statusDraft: "草稿",
+    btnApprove: "通过", btnReject: "拒绝",
     loadingGeo: "正在地理编码…", loadingWeather: "正在获取 72+ 节点天气…",
     loadingScore: "正在计算观星评分…", loadingMatrix: "正在生成热力矩阵…",
     loadingDone: "预报更新完成", loadingError: "加载失败",
@@ -52,7 +90,7 @@ const I18N = {
     pickAdmin: "请选择 {country} 的省/州以缩小范围。",
     pickCity: "请选择 {admin}（{country}）的城市。",
     pickReady: "已基于 {city} 的实时天气推荐本地观测点。",
-    emptyPicks: "选择国家、省/州和城市后解锁 Top 3 推荐。",
+    emptyPicks: "选择国家、省/州和城市后解锁前三推荐。",
     emptyTable: "请先选择国家、省/州和城市以生成本地观测点。",
     localSites: "{count} 个本地站点", nodes: "节点",
     bestWindowPrime: "21:00 – 23:30 最佳", bestWindowGood: "20:30 – 22:30 较好",
@@ -69,11 +107,18 @@ const I18N = {
     loginEyebrow: "Live astronomy planning intelligence",
     loginLede: "A role-based stargazing radar that turns live weather into tonight's best observation windows.",
     heroWeather: "Dynamic weather", heroRoles: "Role-based backend", heroDome: "3D constellation dome",
+    themeLight: "Light", themeDark: "Dark", themeAria: "Toggle theme",
+    roleAdmin: "ADMIN", roleUser: "USER",
+    navDashboard: "Radar", navProfile: "Profile",
     tabLogin: "Login", tabSignup: "Sign Up", authLogin: "Secure Login", authSignup: "Create Account",
     labelUsername: "Username", labelPassword: "Password", labelConfirm: "Confirm Password",
     passwordRule: "Password must be at least 6 characters and include both letters and numbers.",
+    errPasswordRule: "Password must be at least 6 characters and include both letters and numbers.",
+    errPasswordMismatch: "Passwords do not match.",
+    errUsernameRule: "Username must be 3-20 characters using letters, numbers, or underscore.",
+    errUsernameExists: "That username already exists.",
+    errInvalidCredentials: "Invalid credentials.",
     btnEnter: "Enter Dashboard", btnSignup: "Create USER Account", btnLogout: "Logout",
-    demoTitle: "Demo accounts", demoNote: "New signups become USER accounts.",
     appEyebrow: "StarScope Observation Radar", appTitle: "Tonight's Sky Window",
     metricNodes: "Forecast Nodes", metricGeo: "Geocoded Pool", metricPrime: "Prime Windows", metricBest: "Best Tonight",
     locEyebrow: "Start with your location", locTitle: "Where are you observing from?",
@@ -84,14 +129,42 @@ const I18N = {
     sortMatch: "Best Match", sortScore: "Stargazing Score", sortRisk: "Weather Obstruction",
     sortWind: "Wind Speed", sortRain: "Precipitation", sortTemp: "Temperature",
     bandAll: "All", bandPrime: "Prime", bandGood: "Good", bandMarginal: "Marginal", bandPoor: "Poor",
-    btnRefresh: "Refresh Forecast", btnRedTeam: "Red Team",
+    btnRefresh: "Refresh Forecast", btnExport: "Export Data", btnRedTeam: "Red Team",
     defenseTitle: "Input Security Demo", defenseTag: "InputSanitizer",
     defenseEmpty: "Click Red Team above to run canned payloads through InputSanitizer.",
+    defenseAllowed: "ALLOWED",
+    defenseBlocked: "BLOCKED",
     domeEyebrow: "Interactive constellation dome", domeTitle: "3D Night Sky Map",
-    domeDesc: "Drag to rotate the dome. Constellations scale by size — click for observing notes.",
+    domeDesc: "Drag to rotate the educational sky dome. Constellations are spread by approximate sky direction and scale by relative size.",
     tableTitle: "Recommended Observation Sites", thSite: "Site", thType: "Type", thViewing: "Viewing",
     thScore: "Score", thTemp: "Temp", thWind: "Wind", thRain: "Rain",
     matrixTitle: "Sky Quality Heatmap", matrixTag: "2D array",
+    adminTitle: "Admin Operations", adminTag: "Restricted", adminAudit: "System Audit", adminApplications: "Site Review Queue",
+    adminReviewTitle: "User Site Draft Review", adminReviewTag: "Approve / Reject",
+    adminReviewEmpty: "No user-submitted site drafts yet.",
+    userTitle: "Student Analyst View", userTag: "Read-only",
+    userNote: "Analysts can inspect live weather-driven stargazing recommendations, sort/filter viewing windows, use the constellation dome, and run the sanitizer demo. Admin-only audit logs are hidden.",
+    profileEyebrow: "Personal observation profile", profileTitle: "My StarScope Space",
+    profileNote: "Manage account details, drafts, review progress, and submit strong stargazing locations for admin approval.",
+    adminProfileEyebrow: "Admin review desk", adminProfileTitle: "User Site Drafts",
+    adminProfileNote: "Review user-submitted observing-site drafts on the left, then approve or reject on the right.",
+    profileBasic: "Basic Info", profileName: "Username", profileDraftCount: "Drafts",
+    profilePendingCount: "Pending", profileApprovedCount: "Approved",
+    applicationTitle: "Recommend an Observing Site", applicationTag: "Template",
+    appSiteName: "Site Name", appCountry: "Country", appAdmin: "Province / State", appCity: "City",
+    appDistrict: "District / Area", appType: "Site Type", appReason: "Why it works for stargazing",
+    btnSaveDraft: "Save Draft", btnSubmitApplication: "Submit for Review",
+    draftBox: "Draft Box", draftTag: "Not submitted", progressBox: "Application Progress", progressTag: "Review state",
+    emptyDrafts: "No drafts yet. Fill the template and save a draft.",
+    emptyProgress: "No submitted sites yet.",
+    emptyAdminApplications: "No site applications waiting for review.",
+    statusDraftSaved: "Draft saved.",
+    statusSubmitted: "Application submitted for admin review.",
+    statusApplicationError: "Application save failed",
+    statusExporting: "Exporting live stargazing data…",
+    statusExportReady: "CSV download started.",
+    statusApproved: "Approved", statusRejected: "Rejected", statusPending: "Pending", statusDraft: "Draft",
+    btnApprove: "Approve", btnReject: "Reject",
     loadingGeo: "Geocoding observation pool…", loadingWeather: "Fetching 72+ weather nodes…",
     loadingScore: "Calculating stargazing scores…", loadingMatrix: "Building heat matrix…",
     loadingDone: "Forecast update complete", loadingError: "Load failed",
@@ -126,6 +199,8 @@ function t(key, vars = {}) {
 }
 
 function applyI18n() {
+  document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
+  document.title = state.lang === "zh" ? "StarScope 观星雷达" : "StarScope Stargazing Radar";
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (key) el.textContent = t(key);
@@ -140,16 +215,33 @@ function applyI18n() {
     els.authTitle.textContent = t("authLogin");
     els.authSubmitBtn.textContent = t("btnEnter");
   }
+  setTheme(document.body.dataset.theme || "dark");
   updateLocationHint();
+  if (state.nodes.length) {
+    populateLocationSelectors();
+  }
   renderMatrixLegend();
-  if (state.nodes.length) renderNodes();
-  if (!state.user && els.statusLine) els.statusLine.textContent = t("statusWait");
+  if (state.nodes.length) {
+    renderNodes();
+    renderMatrix();
+  }
+  if (state.user && els.roleBadge) els.roleBadge.textContent = roleLabel(state.user.role);
+  if (state.user) {
+    renderProfile();
+    if (state.user.role === "ADMIN") loadAdminApplications();
+  }
+  if (state.user && state.nodes.length && els.statusLine) {
+    els.statusLine.textContent = t("statusDone");
+  } else if (!state.user && els.statusLine) {
+    els.statusLine.textContent = t("statusWait");
+  }
   constellationButtons();
   if (state.selectedConstellation) {
     selectConstellation(state.selectedConstellation);
   } else if (els.constellationInfo) {
+    const fallbackConstellation = localizedConstellation("Orion");
     els.constellationInfo.innerHTML = `
-      <strong>Orion</strong>
+      <strong>${escapeHtml(fallbackConstellation?.name || "Orion")}</strong>
       <span>${escapeHtml(t("cSelectHint"))}</span>
     `;
   }
@@ -164,6 +256,199 @@ function toggleLang() {
 function bandLabel(band) {
   const map = { Prime: t("bandPrime"), Good: t("bandGood"), Marginal: t("bandMarginal"), Poor: t("bandPoor"), All: t("bandAll") };
   return map[band] || band;
+}
+
+function roleLabel(role) {
+  return role === "ADMIN" ? t("roleAdmin") : t("roleUser");
+}
+
+function applicationStatusLabel(status) {
+  const map = {
+    DRAFT: t("statusDraft"),
+    PENDING: t("statusPending"),
+    APPROVED: t("statusApproved"),
+    REJECTED: t("statusRejected")
+  };
+  return map[status] || status;
+}
+
+const DISPLAY_LABELS = {
+  zh: {
+    countries: {
+      China: "中国",
+      "United States": "美国"
+    },
+    adminAreas: {
+      Shanghai: "上海",
+      Beijing: "北京",
+      Guangdong: "广东",
+      Sichuan: "四川",
+      Yunnan: "云南",
+      Tibet: "西藏",
+      Qinghai: "青海",
+      Xinjiang: "新疆",
+      Gansu: "甘肃",
+      "Inner Mongolia": "内蒙古",
+      Zhejiang: "浙江",
+      Jiangsu: "江苏",
+      Shaanxi: "陕西",
+      Hainan: "海南",
+      Tianjin: "天津",
+      Chongqing: "重庆",
+      Hubei: "湖北",
+      Heilongjiang: "黑龙江",
+      Hunan: "湖南",
+      Fujian: "福建",
+      Guizhou: "贵州",
+      Guangxi: "广西",
+      Henan: "河南",
+      Shandong: "山东",
+      Anhui: "安徽",
+      Hebei: "河北",
+      California: "加利福尼亚",
+      Arizona: "亚利桑那",
+      Utah: "犹他",
+      Colorado: "科罗拉多",
+      Hawaii: "夏威夷",
+      Alaska: "阿拉斯加",
+      Texas: "得克萨斯",
+      "New Mexico": "新墨西哥",
+      Nevada: "内华达",
+      Washington: "华盛顿州",
+      Oregon: "俄勒冈",
+      Florida: "佛罗里达",
+      "New York": "纽约州",
+      Massachusetts: "马萨诸塞",
+      Illinois: "伊利诺伊"
+    },
+    cities: {
+      Shanghai: "上海",
+      Beijing: "北京",
+      Guangzhou: "广州",
+      Shenzhen: "深圳",
+      Chengdu: "成都",
+      Kunming: "昆明",
+      Lijiang: "丽江",
+      Lhasa: "拉萨",
+      Xining: "西宁",
+      Urumqi: "乌鲁木齐",
+      Dunhuang: "敦煌",
+      Hohhot: "呼和浩特",
+      Hangzhou: "杭州",
+      Nanjing: "南京",
+      "Xi'an": "西安",
+      Sanya: "三亚",
+      Tianjin: "天津",
+      Chongqing: "重庆",
+      Wuhan: "武汉",
+      Harbin: "哈尔滨",
+      Changsha: "长沙",
+      Fuzhou: "福州",
+      Xiamen: "厦门",
+      Guiyang: "贵阳",
+      Nanning: "南宁",
+      Zhengzhou: "郑州",
+      Jinan: "济南",
+      Qingdao: "青岛",
+      Hefei: "合肥",
+      Shijiazhuang: "石家庄",
+      "Los Angeles": "洛杉矶",
+      "San Francisco": "旧金山",
+      Phoenix: "凤凰城",
+      "Salt Lake City": "盐湖城",
+      Denver: "丹佛",
+      Honolulu: "檀香山",
+      Anchorage: "安克雷奇",
+      Austin: "奥斯汀",
+      Albuquerque: "阿尔伯克基",
+      "Las Vegas": "拉斯维加斯",
+      Seattle: "西雅图",
+      Portland: "波特兰",
+      Miami: "迈阿密",
+      "New York": "纽约",
+      Boston: "波士顿",
+      Chicago: "芝加哥"
+    },
+    regions: {
+      Asia: "亚洲",
+      "North America": "北美洲",
+      Europe: "欧洲",
+      Oceania: "大洋洲",
+      "South America": "南美洲",
+      Africa: "非洲",
+      Other: "其他"
+    },
+    nodeTypes: {
+      Urban: "城市",
+      Coastal: "海岸",
+      Mountain: "山地",
+      Desert: "沙漠",
+      Plateau: "高原",
+      Island: "岛屿",
+      Inland: "内陆",
+      Suburban: "近郊",
+      Rural: "乡村",
+      Observatory: "天文台",
+      Other: "其他"
+    }
+  }
+};
+
+function displayLabel(group, value) {
+  const text = String(value ?? "").trim();
+  if (!text || state.lang !== "zh") return text;
+  return DISPLAY_LABELS.zh[group]?.[text] || text;
+}
+
+function canonicalLabel(group, value) {
+  const text = String(value ?? "").trim();
+  const labels = DISPLAY_LABELS.zh[group] || {};
+  for (const [key, translated] of Object.entries(labels)) {
+    if (text === translated || text === key) return key;
+  }
+  return text;
+}
+
+function displayCountryName(country) {
+  return displayLabel("countries", country);
+}
+
+function displayAdminAreaName(area) {
+  return displayLabel("adminAreas", area);
+}
+
+function displayCityName(city) {
+  return displayLabel("cities", city);
+}
+
+function displayRegionName(region) {
+  return displayLabel("regions", region);
+}
+
+function displayNodeType(node) {
+  return node.displayNodeType || displayLabel("nodeTypes", node.nodeType);
+}
+
+function displayNodeName(node) {
+  return node.displayName || displayCityName(node.city);
+}
+
+function displayDistrictName(node) {
+  return node.displayDistrict || node.district || "";
+}
+
+function displayAdvice(node) {
+  return node.displayAdvice || node.advice || "";
+}
+
+function displayDefenseStatus(status) {
+  const text = String(status || "");
+  if (state.lang !== "zh") return text;
+  if (text === "ALLOWED") return t("defenseAllowed");
+  if (text.startsWith("BLOCKED / ")) {
+    return `${t("defenseBlocked")} / ${text.replace("BLOCKED / ", "")}`;
+  }
+  return text;
 }
 
 const $ = selector => document.querySelector(selector);
@@ -182,6 +467,12 @@ const els = {
   loginThemeToggle: $("#loginThemeToggle"),
   usernameLabel: $("#usernameLabel"),
   roleBadge: $("#roleBadge"),
+  dashboardView: $("#dashboardView"),
+  profileView: $("#profileView"),
+  userProfileGrid: $("#userProfileGrid"),
+  adminProfileReviewPanel: $("#adminProfileReviewPanel"),
+  dashboardNavBtn: $("#dashboardNavBtn"),
+  profileNavBtn: $("#profileNavBtn"),
   themeToggle: $("#themeToggle"),
   logoutBtn: $("#logoutBtn"),
   nodeCount: $("#nodeCount"),
@@ -196,6 +487,7 @@ const els = {
   sortSelect: $("#sortSelect"),
   riskSelect: $("#riskSelect"),
   refreshBtn: $("#refreshBtn"),
+  exportBtn: $("#exportBtn"),
   redTeamBtn: $("#redTeamBtn"),
   statusLine: $("#statusLine"),
   recordCount: $("#recordCount"),
@@ -204,6 +496,8 @@ const els = {
   matrixLegend: $("#matrixLegend"),
   adminPanel: $("#adminPanel"),
   userPanel: $("#userPanel"),
+  adminApplicationsList: $("#adminApplicationsList"),
+  profileAdminApplicationsList: $("#profileAdminApplicationsList"),
   defensePanel: $("#defensePanel"),
   auditList: $("#auditList"),
   defenseList: $("#defenseList"),
@@ -221,10 +515,35 @@ const els = {
   passwordInput: $("#passwordInput"),
   passwordStrength: $("#passwordStrength"),
   strengthFill: $("#strengthFill"),
-  strengthLabel: $("#strengthLabel")
+  strengthLabel: $("#strengthLabel"),
+  profileRole: $("#profileRole"),
+  profileEyebrowText: $("#profileEyebrowText"),
+  profileTitleText: $("#profileTitleText"),
+  profileNoteText: $("#profileNoteText"),
+  profileName: $("#profileName"),
+  profileDraftCount: $("#profileDraftCount"),
+  profilePendingCount: $("#profilePendingCount"),
+  profileApprovedCount: $("#profileApprovedCount"),
+  siteApplicationForm: $("#siteApplicationForm"),
+  saveDraftBtn: $("#saveDraftBtn"),
+  submitApplicationBtn: $("#submitApplicationBtn"),
+  applicationStatus: $("#applicationStatus"),
+  draftList: $("#draftList"),
+  progressList: $("#progressList")
 };
 
 setTheme(localStorage.getItem("starscope-theme") || "dark");
+
+function skyCenter(azimuthDeg, altitudeDeg, radius = 82) {
+  const azimuth = azimuthDeg * Math.PI / 180;
+  const altitude = altitudeDeg * Math.PI / 180;
+  const horizontal = Math.cos(altitude) * radius;
+  return [
+    Math.sin(azimuth) * horizontal,
+    Math.sin(altitude) * radius - 8,
+    -Math.cos(azimuth) * horizontal
+  ];
+}
 
 function makeConstellation(config) {
   return {
@@ -248,7 +567,7 @@ const constellations = [
     keyStars: "Betelgeuse, Rigel, Bellatrix",
     color: 0xffc66d,
     size: 5.4,
-    center: [-16, 8, -78],
+    center: skyCenter(-8, 22, 78),
     pattern: [[-3, 3], [-1, 1], [0, 0.7], [1, 1], [3, 3], [-1.5, -1], [1.5, -1], [-3, -4], [3, -4]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [3, 6], [5, 7], [6, 8]]
   }),
@@ -262,7 +581,7 @@ const constellations = [
     keyStars: "Dubhe, Merak, Alioth, Mizar",
     color: 0x8fd3ff,
     size: 6.6,
-    center: [-45, 34, -55],
+    center: skyCenter(-68, 48, 78),
     pattern: [[-4, 0], [-2, 1], [0, 0.7], [2, -0.2], [4, 1.3], [2.4, 3.1], [0, 2.8]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 2]]
   }),
@@ -276,7 +595,7 @@ const constellations = [
     keyStars: "Schedar, Caph, Ruchbah",
     color: 0xd7b7ff,
     size: 4.3,
-    center: [50, 45, -54],
+    center: skyCenter(64, 58, 78),
     pattern: [[-4, 1], [-2, -1], [0, 1.1], [2, -1], [4, 0.9]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4]]
   }),
@@ -290,7 +609,7 @@ const constellations = [
     keyStars: "Antares, Shaula, Sargas",
     color: 0xff7d7d,
     size: 5.8,
-    center: [32, -28, -72],
+    center: skyCenter(92, 14, 82),
     pattern: [[-2, 3], [-1, 1.3], [0, 0], [1, -1.5], [0.5, -3.5], [-1, -4.7], [-2.8, -4], [-3.3, -2.2]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]]
   }),
@@ -304,7 +623,7 @@ const constellations = [
     keyStars: "Deneb, Sadr, Albireo",
     color: 0xa6f0c6,
     size: 4.9,
-    center: [-4, 46, -66],
+    center: skyCenter(16, 66, 75),
     pattern: [[0, 3], [0, 1], [0, -1.5], [-2.8, 0.7], [2.8, 0.7]],
     lines: [[0, 1], [1, 2], [1, 3], [1, 4]]
   }),
@@ -318,7 +637,7 @@ const constellations = [
     keyStars: "Regulus, Denebola, Algieba",
     color: 0xffdf80,
     size: 4.8,
-    center: [6, 20, -86],
+    center: skyCenter(-118, 34, 80),
     pattern: [[-4, -1], [-2, 0], [0, -0.5], [2, 0.7], [4, 0], [1.2, 2], [0, 3], [-1.4, 2.3]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4], [3, 5], [5, 6], [6, 7], [7, 2]]
   }),
@@ -332,7 +651,7 @@ const constellations = [
     keyStars: "Aldebaran, Elnath, Hyades",
     color: 0xffa987,
     size: 4.1,
-    center: [-58, -8, -68],
+    center: skyCenter(-38, 16, 84),
     pattern: [[-3, 1], [-1, 0], [0, -1], [1, 0], [3, 1], [-4, 3], [4, 3]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [3, 6]]
   }),
@@ -346,7 +665,7 @@ const constellations = [
     keyStars: "Castor, Pollux, Alhena",
     color: 0x9ecbff,
     size: 3.9,
-    center: [-32, -24, -78],
+    center: skyCenter(-82, 20, 82),
     pattern: [[-2, 2], [-2, 0.5], [-1.8, -1], [-1.4, -2.6], [2, 2], [1.8, 0.5], [1.4, -1], [1.1, -2.6]],
     lines: [[0, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 7], [1, 5]]
   }),
@@ -360,7 +679,7 @@ const constellations = [
     keyStars: "Vega, Sheliak, Sulafat",
     color: 0xc0e7ff,
     size: 2.6,
-    center: [28, 25, -88],
+    center: skyCenter(42, 52, 78),
     pattern: [[0, 3], [-1.2, 0.8], [1.2, 0.8], [1.1, -1.2], [-1.1, -1.2]],
     lines: [[0, 1], [0, 2], [1, 4], [4, 3], [3, 2]]
   }),
@@ -374,7 +693,7 @@ const constellations = [
     keyStars: "Altair, Tarazed, Alshain",
     color: 0xb8f7dc,
     size: 3.8,
-    center: [58, 4, -70],
+    center: skyCenter(108, 32, 80),
     pattern: [[0, 3], [-1, 1], [0, 0], [1, 1], [0, -2.5], [-2, -1.2], [2, -1.2]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 0], [2, 4], [4, 5], [4, 6]]
   }),
@@ -388,7 +707,7 @@ const constellations = [
     keyStars: "Markab, Scheat, Algenib, Alpheratz",
     color: 0xbda7ff,
     size: 6.1,
-    center: [0, -45, -62],
+    center: skyCenter(138, 42, 82),
     pattern: [[-2, 2], [2, 2], [2, -2], [-2, -2], [4, -3.3], [5, -4.8]],
     lines: [[0, 1], [1, 2], [2, 3], [3, 0], [2, 4], [4, 5]]
   }),
@@ -402,7 +721,7 @@ const constellations = [
     keyStars: "Acrux, Mimosa, Gacrux",
     color: 0xffffff,
     size: 2.5,
-    center: [70, -42, -58],
+    center: skyCenter(148, 12, 78),
     pattern: [[0, 2], [0, -2], [-1.2, 0], [1.2, 0]],
     lines: [[0, 1], [2, 3]]
   })
@@ -495,22 +814,22 @@ function localizedConstellation(name) {
 
 const LOCAL_OBSERVING_SITES = {
   "China|Shanghai|Shanghai": [
-    { name: "Dishui Lake", district: "Pudong / Lingang", type: "Lake Horizon", distanceKm: 70, darkness: 76, horizon: 94, access: 88, reason: "open water horizon and fewer skyline obstructions than central Shanghai" },
-    { name: "Dongtan Wetland Park", district: "Chongming", type: "Wetland Reserve", distanceKm: 63, darkness: 82, horizon: 86, access: 74, reason: "lower light spill and broad eastern sky views" },
-    { name: "Sheshan Observatory Area", district: "Songjiang", type: "Observatory Hill", distanceKm: 35, darkness: 68, horizon: 78, access: 92, reason: "historic astronomy site with slightly elevated terrain" },
-    { name: "Dongping National Forest Park", district: "Chongming", type: "Forest Edge", distanceKm: 75, darkness: 80, horizon: 72, access: 78, reason: "darker park surroundings away from the urban core" },
-    { name: "Nanhuizui Sea-Viewing Park", district: "Pudong / Lingang", type: "Coastal Edge", distanceKm: 73, darkness: 74, horizon: 96, access: 84, reason: "clear southeast horizon over open sea" },
-    { name: "Fengxian Bay Forest Park", district: "Fengxian", type: "Coastal Forest", distanceKm: 49, darkness: 70, horizon: 82, access: 84, reason: "coastal air exposure and less dense high-rise lighting" },
-    { name: "Qingxi Country Park", district: "Qingpu", type: "Country Park", distanceKm: 50, darkness: 72, horizon: 70, access: 82, reason: "suburban park setting with calmer local light conditions" },
-    { name: "Changxing Island Country Park", district: "Chongming", type: "Island Park", distanceKm: 39, darkness: 66, horizon: 76, access: 82, reason: "river-island spacing reduces some central-city glare" },
-    { name: "Jinshan City Beach", district: "Jinshan", type: "Coastal Horizon", distanceKm: 64, darkness: 69, horizon: 92, access: 80, reason: "wide southern horizon for Moon, planets, and bright constellations" },
-    { name: "Yangshan Coast Viewpoint", district: "Pudong / Offshore", type: "Deep-Water Coast", distanceKm: 92, darkness: 84, horizon: 98, access: 58, reason: "best darkness and sea horizon, but farther from the city center" }
+    { name: "Dishui Lake", district: "Pudong / Lingang", type: "Lake Horizon", distanceKm: 70, darkness: 76, horizon: 94, access: 88, reason: "open water horizon and fewer skyline obstructions than central Shanghai", zh: { name: "滴水湖", district: "浦东 / 临港", type: "湖面开阔视野", reason: "开阔湖面地平线更干净，高楼遮挡少于上海中心城区" } },
+    { name: "Dongtan Wetland Park", district: "Chongming", type: "Wetland Reserve", distanceKm: 63, darkness: 82, horizon: 86, access: 74, reason: "lower light spill and broad eastern sky views", zh: { name: "东滩湿地公园", district: "崇明", type: "湿地保护区", reason: "光污染外溢较低，东侧天空视野宽" } },
+    { name: "Sheshan Observatory Area", district: "Songjiang", type: "Observatory Hill", distanceKm: 35, darkness: 68, horizon: 78, access: 92, reason: "historic astronomy site with slightly elevated terrain", zh: { name: "佘山天文台周边", district: "松江", type: "天文台山地", reason: "有天文观测历史，地势略高，适合课堂讲解" } },
+    { name: "Dongping National Forest Park", district: "Chongming", type: "Forest Edge", distanceKm: 75, darkness: 80, horizon: 72, access: 78, reason: "darker park surroundings away from the urban core", zh: { name: "崇明东平国家森林公园", district: "崇明", type: "森林边缘", reason: "远离中心城区，公园周边夜间环境更暗" } },
+    { name: "Nanhuizui Sea-Viewing Park", district: "Pudong / Lingang", type: "Coastal Edge", distanceKm: 73, darkness: 74, horizon: 96, access: 84, reason: "clear southeast horizon over open sea", zh: { name: "南汇嘴观海公园", district: "浦东 / 临港", type: "海岸边缘", reason: "面向开阔海面，东南方向地平线清楚" } },
+    { name: "Fengxian Bay Forest Park", district: "Fengxian", type: "Coastal Forest", distanceKm: 49, darkness: 70, horizon: 82, access: 84, reason: "coastal air exposure and less dense high-rise lighting", zh: { name: "奉贤海湾森林公园", district: "奉贤", type: "海岸森林", reason: "靠海通风，高楼灯光密度比市中心低" } },
+    { name: "Qingxi Country Park", district: "Qingpu", type: "Country Park", distanceKm: 50, darkness: 72, horizon: 70, access: 82, reason: "suburban park setting with calmer local light conditions", zh: { name: "青西郊野公园", district: "青浦", type: "郊野公园", reason: "郊野公园环境较安静，局部眩光更少" } },
+    { name: "Changxing Island Country Park", district: "Chongming", type: "Island Park", distanceKm: 39, darkness: 66, horizon: 76, access: 82, reason: "river-island spacing reduces some central-city glare", zh: { name: "长兴岛郊野公园", district: "崇明", type: "岛屿公园", reason: "江岛间距能削弱部分中心城区光晕" } },
+    { name: "Jinshan City Beach", district: "Jinshan", type: "Coastal Horizon", distanceKm: 64, darkness: 69, horizon: 92, access: 80, reason: "wide southern horizon for Moon, planets, and bright constellations", zh: { name: "金山城市沙滩", district: "金山", type: "海岸地平线", reason: "南向地平线开阔，适合月亮、行星和亮星座" } },
+    { name: "Yangshan Coast Viewpoint", district: "Pudong / Offshore", type: "Deep-Water Coast", distanceKm: 92, darkness: 84, horizon: 98, access: 58, reason: "best darkness and sea horizon, but farther from the city center", zh: { name: "洋山海岸观景点", district: "浦东 / 近海", type: "深水港海岸", reason: "暗度和海面地平线最好，但距离市中心更远" } }
   ],
   "China|Beijing|Beijing": [
-    { name: "Miyun Reservoir North Shore", district: "Miyun", type: "Reservoir Horizon", distanceKm: 88, darkness: 86, horizon: 88, access: 72, reason: "waterfront horizon and darker northern suburbs" },
-    { name: "Huairou Mountain Edge", district: "Huairou", type: "Mountain Edge", distanceKm: 72, darkness: 82, horizon: 78, access: 76, reason: "mountain-air setting with lower urban glow" },
-    { name: "Yanqing Wild Duck Lake", district: "Yanqing", type: "Wetland Reserve", distanceKm: 82, darkness: 84, horizon: 86, access: 74, reason: "open wetland sky and less dense lighting" },
-    { name: "Mentougou Tanzhe Area", district: "Mentougou", type: "Western Hills", distanceKm: 48, darkness: 74, horizon: 70, access: 82, reason: "nearby western escape from central light pollution" }
+    { name: "Miyun Reservoir North Shore", district: "Miyun", type: "Reservoir Horizon", distanceKm: 88, darkness: 86, horizon: 88, access: 72, reason: "waterfront horizon and darker northern suburbs", zh: { name: "密云水库北岸", district: "密云", type: "水库开阔视野", reason: "水库岸线开阔，北部郊区夜空更暗" } },
+    { name: "Huairou Mountain Edge", district: "Huairou", type: "Mountain Edge", distanceKm: 72, darkness: 82, horizon: 78, access: 76, reason: "mountain-air setting with lower urban glow", zh: { name: "怀柔山地边缘", district: "怀柔", type: "山地边缘", reason: "山地空气环境较好，城市光晕更低" } },
+    { name: "Yanqing Wild Duck Lake", district: "Yanqing", type: "Wetland Reserve", distanceKm: 82, darkness: 84, horizon: 86, access: 74, reason: "open wetland sky and less dense lighting", zh: { name: "延庆野鸭湖", district: "延庆", type: "湿地保护区", reason: "湿地天空开阔，周边照明密度较低" } },
+    { name: "Mentougou Tanzhe Area", district: "Mentougou", type: "Western Hills", distanceKm: 48, darkness: 74, horizon: 70, access: 82, reason: "nearby western escape from central light pollution", zh: { name: "门头沟潭柘一带", district: "门头沟", type: "西山边缘", reason: "靠近西部山地，可避开部分中心城区光污染" } }
   ]
 };
 
@@ -519,7 +838,12 @@ els.loginModeBtn.addEventListener("click", () => setAuthMode("login"));
 els.signupModeBtn.addEventListener("click", () => setAuthMode("signup"));
 els.logoutBtn.addEventListener("click", logout);
 els.refreshBtn.addEventListener("click", loadClimate);
+els.exportBtn.addEventListener("click", exportClimate);
 els.redTeamBtn.addEventListener("click", runRedTeam);
+els.dashboardNavBtn.addEventListener("click", () => setView("dashboard"));
+els.profileNavBtn.addEventListener("click", () => setView("profile"));
+els.saveDraftBtn.addEventListener("click", () => saveSiteApplication("draft"));
+els.submitApplicationBtn.addEventListener("click", () => saveSiteApplication("submit"));
 els.sortSelect.addEventListener("change", renderNodes);
 els.riskSelect.addEventListener("change", renderNodes);
 els.countrySelect.addEventListener("change", handleCountryChange);
@@ -540,6 +864,7 @@ async function checkSession() {
   if (response.ok) {
     state.user = await response.json();
     showApp();
+    await loadApplications();
     await loadClimate();
   }
 }
@@ -565,11 +890,11 @@ async function login(event) {
   if (state.authMode === "signup") {
     const password = String(form.get("password") || "");
     if (!isValidSignupPassword(password)) {
-      els.loginError.textContent = "Password must be at least 6 characters and include both letters and numbers.";
+      els.loginError.textContent = t("errPasswordRule");
       return;
     }
     if (password !== form.get("confirmPassword")) {
-      els.loginError.textContent = "Passwords do not match.";
+      els.loginError.textContent = t("errPasswordMismatch");
       return;
     }
   }
@@ -596,12 +921,12 @@ function isValidSignupPassword(password) {
 
 function authErrorMessage(error) {
   const messages = {
-    PASSWORD_MUST_BE_6_PLUS_WITH_LETTERS_AND_NUMBERS: "Password must be at least 6 characters and include both letters and numbers.",
-    USERNAME_MUST_BE_3_20_ALNUM_OR_UNDERSCORE: "Username must be 3-20 characters using letters, numbers, or underscore.",
-    USERNAME_ALREADY_EXISTS: "That username already exists.",
-    INVALID_CREDENTIALS: "Invalid credentials."
+    PASSWORD_MUST_BE_6_PLUS_WITH_LETTERS_AND_NUMBERS: t("errPasswordRule"),
+    USERNAME_MUST_BE_3_20_ALNUM_OR_UNDERSCORE: t("errUsernameRule"),
+    USERNAME_ALREADY_EXISTS: t("errUsernameExists"),
+    INVALID_CREDENTIALS: t("errInvalidCredentials")
   };
-  return messages[error] || error || "Invalid credentials.";
+  return messages[error] || error || t("errInvalidCredentials");
 }
 
 async function logout() {
@@ -617,13 +942,30 @@ function showApp() {
   els.loginView.classList.add("hidden");
   els.appView.classList.remove("hidden");
   els.usernameLabel.textContent = state.user.username;
-  els.roleBadge.textContent = state.user.role;
+  els.roleBadge.textContent = roleLabel(state.user.role);
   els.adminPanel.classList.toggle("hidden", state.user.role !== "ADMIN");
   els.userPanel.classList.toggle("hidden", state.user.role === "ADMIN");
+  setView(state.currentView);
+  renderProfile();
   if (!els.defenseList.children.length) {
     els.defenseList.innerHTML = `<p class="defense-empty">${escapeHtml(t("defenseEmpty"))}</p>`;
   }
   requestAnimationFrame(initStarDome);
+}
+
+function setView(view) {
+  state.currentView = view;
+  const isProfile = view === "profile";
+  els.dashboardView.classList.toggle("hidden", isProfile);
+  els.profileView.classList.toggle("hidden", !isProfile);
+  els.dashboardNavBtn.classList.toggle("is-active", !isProfile);
+  els.profileNavBtn.classList.toggle("is-active", isProfile);
+  if (isProfile) {
+    renderProfile();
+    if (state.user?.role === "ADMIN") {
+      loadAdminApplications();
+    }
+  }
 }
 
 function toggleTheme() {
@@ -633,12 +975,14 @@ function toggleTheme() {
 function setTheme(theme) {
   document.body.dataset.theme = theme;
   localStorage.setItem("starscope-theme", theme);
-  const label = theme === "dark" ? "Light" : "Dark";
+  const label = theme === "dark" ? t("themeLight") : t("themeDark");
   if (els.themeToggle) {
     els.themeToggle.textContent = label;
+    els.themeToggle.setAttribute("aria-label", t("themeAria"));
   }
   if (els.loginThemeToggle) {
     els.loginThemeToggle.textContent = label;
+    els.loginThemeToggle.setAttribute("aria-label", t("themeAria"));
   }
 }
 
@@ -652,13 +996,18 @@ async function loadClimate() {
     const payload = await response.json();
     state.nodes = payload.nodes || [];
     state.matrix = payload.matrix || [];
+    await loadApprovedSites();
+    await loadApplications();
     finishLoadingProgress(progress);
     restoreSavedLocation();
     populateLocationSelectors();
     renderMetrics(payload);
     renderNodes();
     renderMatrix();
-    if (state.user.role === "ADMIN") await loadAudit();
+    if (state.user.role === "ADMIN") {
+      await loadAudit();
+      await loadAdminApplications();
+    }
     setStatus(t("statusDone"));
   } catch (error) {
     stopLoadingProgress(progress);
@@ -666,6 +1015,176 @@ async function loadClimate() {
   } finally {
     els.refreshBtn.disabled = false;
   }
+}
+
+async function exportClimate() {
+  setStatus(t("statusExporting"));
+  const response = await fetch("/api/export");
+  if (!response.ok) {
+    setStatus(`${t("loadingError")}: ${response.status}`);
+    return;
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "starscope_weather_export.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  setStatus(t("statusExportReady"));
+}
+
+async function loadApprovedSites() {
+  const response = await fetch("/api/approved-sites");
+  if (!response.ok) return;
+  const payload = await response.json();
+  state.approvedSites = payload.sites || [];
+}
+
+async function loadApplications() {
+  const response = await fetch("/api/site-applications");
+  if (!response.ok) return;
+  const payload = await response.json();
+  state.applications = payload.applications || [];
+  renderProfile();
+}
+
+async function saveSiteApplication(action) {
+  const form = new FormData(els.siteApplicationForm);
+  form.set("country", canonicalLabel("countries", form.get("country")));
+  form.set("adminArea", canonicalLabel("adminAreas", form.get("adminArea")));
+  form.set("city", canonicalLabel("cities", form.get("city")));
+  form.set("action", action);
+  const response = await fetch("/api/site-applications", {
+    method: "POST",
+    body: new URLSearchParams(form)
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    els.applicationStatus.textContent = `${t("statusApplicationError")}: ${payload.error || response.status}`;
+    return;
+  }
+  els.applicationStatus.textContent = action === "draft" ? t("statusDraftSaved") : t("statusSubmitted");
+  els.siteApplicationForm.reset();
+  await loadApplications();
+  if (state.user.role === "ADMIN") await loadAdminApplications();
+}
+
+function renderProfile() {
+  if (!state.user) return;
+  const adminMode = state.user.role === "ADMIN";
+  els.userProfileGrid.classList.toggle("hidden", adminMode);
+  els.adminProfileReviewPanel.classList.toggle("hidden", !adminMode);
+  els.profileEyebrowText.textContent = adminMode ? t("adminProfileEyebrow") : t("profileEyebrow");
+  els.profileTitleText.textContent = adminMode ? t("adminProfileTitle") : t("profileTitle");
+  els.profileNoteText.textContent = adminMode ? t("adminProfileNote") : t("profileNote");
+  if (adminMode) return;
+  if (!els.profileName) return;
+  const drafts = state.applications.filter(item => item.status === "DRAFT");
+  const pending = state.applications.filter(item => item.status === "PENDING");
+  const approved = state.applications.filter(item => item.status === "APPROVED");
+  els.profileName.textContent = state.user.username;
+  els.profileRole.textContent = roleLabel(state.user.role);
+  els.profileDraftCount.textContent = drafts.length;
+  els.profilePendingCount.textContent = pending.length;
+  els.profileApprovedCount.textContent = approved.length;
+  renderApplicationList(els.draftList, drafts, t("emptyDrafts"));
+  renderApplicationList(els.progressList, state.applications.filter(item => item.status !== "DRAFT"), t("emptyProgress"));
+}
+
+function renderApplicationList(container, applications, emptyText, adminMode = false) {
+  container.innerHTML = "";
+  if (!applications.length) {
+    container.innerHTML = `<p class="defense-empty">${escapeHtml(emptyText)}</p>`;
+    return;
+  }
+  applications.forEach(application => {
+    const row = document.createElement("article");
+    row.className = `application-row status-${escapeHtml(application.status)}`;
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(application.name)}</strong>
+        <span>${escapeHtml(displayCountryName(application.country))} · ${escapeHtml(displayAdminAreaName(application.adminArea))} · ${escapeHtml(displayCityName(application.city))}</span>
+        <p>${escapeHtml(application.reason)}</p>
+      </div>
+      <aside>
+        <b>${escapeHtml(applicationStatusLabel(application.status))}</b>
+        ${adminMode ? `<small>${escapeHtml(application.username)}</small>` : ""}
+      </aside>
+    `;
+    if (adminMode && application.status === "PENDING") {
+      const actions = document.createElement("div");
+      actions.className = "review-actions";
+      actions.innerHTML = `
+        <button type="button" data-decision="approve">${escapeHtml(t("btnApprove"))}</button>
+        <button type="button" data-decision="reject">${escapeHtml(t("btnReject"))}</button>
+      `;
+      actions.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => reviewApplication(application.id, button.dataset.decision));
+      });
+      row.appendChild(actions);
+    }
+    container.appendChild(row);
+  });
+}
+
+async function loadAdminApplications() {
+  if (state.user.role !== "ADMIN") return;
+  const response = await fetch("/api/admin/site-applications");
+  if (!response.ok) return;
+  const payload = await response.json();
+  const pendingFirst = (payload.applications || []).slice().sort((a, b) => {
+    const weight = { PENDING: 0, DRAFT: 1, APPROVED: 2, REJECTED: 3 };
+    return (weight[a.status] ?? 9) - (weight[b.status] ?? 9);
+  });
+  renderApplicationList(els.adminApplicationsList, pendingFirst, t("emptyAdminApplications"), true);
+  renderAdminReviewList(els.profileAdminApplicationsList, pendingFirst);
+}
+
+function renderAdminReviewList(container, applications) {
+  if (!container) return;
+  container.innerHTML = "";
+  const reviewable = applications.filter(application =>
+    application.username !== state.user.username
+      && (application.status === "PENDING" || application.status === "DRAFT")
+  );
+  if (!reviewable.length) {
+    container.innerHTML = `<p class="defense-empty">${escapeHtml(t("adminReviewEmpty"))}</p>`;
+    return;
+  }
+  reviewable.forEach(application => {
+    const row = document.createElement("article");
+    row.className = `admin-review-row status-${escapeHtml(application.status)}`;
+    row.innerHTML = `
+      <div class="admin-review-copy">
+        <strong>${escapeHtml(application.name)}</strong>
+        <span>${escapeHtml(application.username)} · ${escapeHtml(displayCountryName(application.country))} · ${escapeHtml(displayAdminAreaName(application.adminArea))} · ${escapeHtml(displayCityName(application.city))}</span>
+        <p>${escapeHtml(application.reason)}</p>
+      </div>
+      <div class="admin-review-actions">
+        <button type="button" data-decision="approve">${escapeHtml(t("btnApprove"))}</button>
+        <button type="button" data-decision="reject">${escapeHtml(t("btnReject"))}</button>
+      </div>
+    `;
+    row.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => reviewApplication(application.id, button.dataset.decision));
+    });
+    container.appendChild(row);
+  });
+}
+
+async function reviewApplication(id, decision) {
+  const response = await fetch("/api/admin/site-applications/review", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ id, decision })
+  });
+  if (!response.ok) return;
+  await loadAdminApplications();
+  await loadApprovedSites();
+  renderNodes();
 }
 
 function startLoadingProgress() {
@@ -814,8 +1333,8 @@ function renderNodes() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="numeric">${String(index + 1).padStart(2, "0")}</td>
-      <td class="city">${escapeHtml(node.city)}<br><span>${escapeHtml(locationMeta(node))}</span><br><em>${escapeHtml(node.advice)}</em></td>
-      <td>${escapeHtml(node.nodeType)}</td>
+      <td class="city">${escapeHtml(displayNodeName(node))}<br><span>${escapeHtml(locationMeta(node))}</span><br><em>${escapeHtml(displayAdvice(node))}</em></td>
+      <td>${escapeHtml(displayNodeType(node))}</td>
       <td><span class="pill ${escapeHtml(node.viewingBand)}">${escapeHtml(bandLabel(node.viewingBand))}</span></td>
       <td class="numeric">${Number(node.stargazingScore).toFixed(1)}</td>
       <td class="numeric">${Number(node.temperature).toFixed(1)}°C</td>
@@ -833,7 +1352,7 @@ function populateLocationSelectors() {
   countries.forEach(country => {
     const option = document.createElement("option");
     option.value = country;
-    option.textContent = country;
+    option.textContent = displayCountryName(country);
     els.countrySelect.appendChild(option);
   });
   if (previousCountry && countries.includes(previousCountry)) {
@@ -860,7 +1379,7 @@ function populateAdminAreaSelect() {
   uniqueAreas.forEach(area => {
     const option = document.createElement("option");
     option.value = area;
-    option.textContent = area;
+    option.textContent = displayAdminAreaName(area);
     els.adminAreaSelect.appendChild(option);
   });
   if (previousArea && uniqueAreas.includes(previousArea)) {
@@ -885,7 +1404,7 @@ function populateCitySelect() {
   uniqueCities.forEach(city => {
     const option = document.createElement("option");
     option.value = city;
-    option.textContent = city;
+    option.textContent = displayCityName(city);
     els.citySelect.appendChild(option);
   });
   if (previousCity && uniqueCities.includes(previousCity)) {
@@ -929,14 +1448,14 @@ function updateLocationHint() {
     return;
   }
   if (!state.selectedAdminArea) {
-    els.locationHint.textContent = t("pickAdmin", { country: state.selectedCountry });
+    els.locationHint.textContent = t("pickAdmin", { country: displayCountryName(state.selectedCountry) });
     return;
   }
   if (!state.selectedCity) {
-    els.locationHint.textContent = t("pickCity", { admin: state.selectedAdminArea, country: state.selectedCountry });
+    els.locationHint.textContent = t("pickCity", { admin: displayAdminAreaName(state.selectedAdminArea), country: displayCountryName(state.selectedCountry) });
     return;
   }
-  els.locationHint.textContent = t("pickReady", { city: state.selectedCity });
+  els.locationHint.textContent = t("pickReady", { city: displayCityName(state.selectedCity) });
 }
 
 function getRecommendedNodes() {
@@ -959,23 +1478,54 @@ function getRecommendedNodes() {
 
 function getLocalSites(base) {
   const key = `${base.country}|${normalizedAdminArea(base) || "Unspecified"}|${base.city}`;
-  return LOCAL_OBSERVING_SITES[key] || genericLocalSites(base);
+  const approved = state.approvedSites
+    .filter(site => `${site.country}|${site.adminArea || "Unspecified"}|${site.city}` === key)
+    .map(applicationToLocalSite);
+  const defaults = LOCAL_OBSERVING_SITES[key] || genericLocalSites(base);
+  return [...approved, ...defaults];
+}
+
+function applicationToLocalSite(application) {
+  return {
+    name: application.name,
+    district: application.district || application.username,
+    type: application.type || "Community Site",
+    distanceKm: 24,
+    darkness: 74,
+    horizon: 82,
+    access: 72,
+    reason: `${application.reason} Submitted by ${application.username}`,
+    zh: {
+      name: application.name,
+      district: application.district || application.username,
+      type: application.type || "社区推荐点",
+      reason: `${application.reason}（由 ${application.username} 提交）`
+    }
+  };
 }
 
 function genericLocalSites(base) {
   const city = base.city;
+  const cityZh = displayCityName(city);
   return [
-    { name: `${city} Reservoir Horizon`, district: "outer water edge", type: "Water Horizon", distanceKm: 32, darkness: 72, horizon: 90, access: 78, reason: "open water gives a cleaner horizon than dense downtown blocks" },
-    { name: `${city} Country Park Edge`, district: "suburban park", type: "Country Park", distanceKm: 28, darkness: 70, horizon: 76, access: 84, reason: "park surroundings reduce direct streetlight glare" },
-    { name: `${city} Northern Outskirts`, district: "outer district", type: "Suburban Edge", distanceKm: 42, darkness: 76, horizon: 72, access: 70, reason: "farther from the urban light dome while still reachable" },
-    { name: `${city} Coastal Viewpoint`, district: "coastal / river edge", type: "Coastal Horizon", distanceKm: 38, darkness: 68, horizon: 92, access: 78, reason: "wide horizon helps for planets and low constellations" },
-    { name: `${city} Observatory Area`, district: "science campus", type: "Education Site", distanceKm: 18, darkness: 62, horizon: 74, access: 92, reason: "easy access and good for public observing demos" },
-    { name: `${city} Forest Park`, district: "forest park", type: "Forest Edge", distanceKm: 34, darkness: 74, horizon: 68, access: 78, reason: "tree cover blocks local lights, best for high-altitude targets" },
-    { name: `${city} Riverside Open Space`, district: "riverfront", type: "Riverfront", distanceKm: 16, darkness: 58, horizon: 88, access: 94, reason: "not the darkest, but easy to reach and has open sky" },
-    { name: `${city} Western Hills Edge`, district: "higher ground", type: "Highland Edge", distanceKm: 52, darkness: 80, horizon: 70, access: 62, reason: "higher terrain can escape haze and central light spill" },
-    { name: `${city} Agricultural Belt`, district: "rural edge", type: "Rural Edge", distanceKm: 58, darkness: 82, horizon: 78, access: 58, reason: "darker surroundings with fewer commercial lights" },
-    { name: `${city} Campus Sports Field`, district: "campus / school", type: "Campus Field", distanceKm: 8, darkness: 50, horizon: 82, access: 96, reason: "good for quick student demos when travel time matters" }
+    { name: `${city} Reservoir Horizon`, district: "outer water edge", type: "Water Horizon", distanceKm: 32, darkness: 72, horizon: 90, access: 78, reason: "open water gives a cleaner horizon than dense downtown blocks", zh: { name: `${cityZh}水库开阔区`, district: "外围水域", type: "水域地平线", reason: "开阔水面比密集市中心街区拥有更干净的地平线" } },
+    { name: `${city} Country Park Edge`, district: "suburban park", type: "Country Park", distanceKm: 28, darkness: 70, horizon: 76, access: 84, reason: "park surroundings reduce direct streetlight glare", zh: { name: `${cityZh}郊野公园边缘`, district: "近郊公园", type: "郊野公园", reason: "公园环境能减少直接路灯眩光" } },
+    { name: `${city} Northern Outskirts`, district: "outer district", type: "Suburban Edge", distanceKm: 42, darkness: 76, horizon: 72, access: 70, reason: "farther from the urban light dome while still reachable", zh: { name: `${cityZh}北部外围`, district: "外围城区", type: "近郊边缘", reason: "距离城市光穹更远，同时仍然可以到达" } },
+    { name: `${city} Coastal Viewpoint`, district: "coastal / river edge", type: "Coastal Horizon", distanceKm: 38, darkness: 68, horizon: 92, access: 78, reason: "wide horizon helps for planets and low constellations", zh: { name: `${cityZh}海岸观景点`, district: "海岸 / 江边", type: "海岸地平线", reason: "开阔地平线有利于观测行星和低空星座" } },
+    { name: `${city} Observatory Area`, district: "science campus", type: "Education Site", distanceKm: 18, darkness: 62, horizon: 74, access: 92, reason: "easy access and good for public observing demos", zh: { name: `${cityZh}天文观测区`, district: "科普园区", type: "科普观测点", reason: "交通方便，适合公开观测和课堂演示" } },
+    { name: `${city} Forest Park`, district: "forest park", type: "Forest Edge", distanceKm: 34, darkness: 74, horizon: 68, access: 78, reason: "tree cover blocks local lights, best for high-altitude targets", zh: { name: `${cityZh}森林公园`, district: "森林公园", type: "森林边缘", reason: "树木可遮挡局部灯光，更适合高空目标" } },
+    { name: `${city} Riverside Open Space`, district: "riverfront", type: "Riverfront", distanceKm: 16, darkness: 58, horizon: 88, access: 94, reason: "not the darkest, but easy to reach and has open sky", zh: { name: `${cityZh}滨水开阔地`, district: "滨水区", type: "江河岸线", reason: "不是最暗，但易到达且天空开阔" } },
+    { name: `${city} Western Hills Edge`, district: "higher ground", type: "Highland Edge", distanceKm: 52, darkness: 80, horizon: 70, access: 62, reason: "higher terrain can escape haze and central light spill", zh: { name: `${cityZh}西部山地边缘`, district: "较高地势", type: "高地边缘", reason: "较高地势有机会避开雾霾和中心光污染" } },
+    { name: `${city} Agricultural Belt`, district: "rural edge", type: "Rural Edge", distanceKm: 58, darkness: 82, horizon: 78, access: 58, reason: "darker surroundings with fewer commercial lights", zh: { name: `${cityZh}农田带`, district: "乡村边缘", type: "乡村边缘", reason: "商业照明更少，周边环境更暗" } },
+    { name: `${city} Campus Sports Field`, district: "campus / school", type: "Campus Field", distanceKm: 8, darkness: 50, horizon: 82, access: 96, reason: "good for quick student demos when travel time matters", zh: { name: `${cityZh}校园运动场`, district: "校园 / 学校", type: "校园场地", reason: "适合时间有限时进行学生快速演示" } }
   ];
+}
+
+function localSiteField(site, field) {
+  if (state.lang === "zh" && site.zh?.[field]) {
+    return site.zh[field];
+  }
+  return site[field];
 }
 
 function buildLocalSiteNode(site, base) {
@@ -984,17 +1534,25 @@ function buildLocalSiteNode(site, base) {
   const distancePenalty = Math.min(18, site.distanceKm * 0.16);
   const score = clamp(weatherScore * 0.68 + localQuality * 0.32 - distancePenalty, 0, 100);
   const band = viewingBandFromScore(score);
+  const baseCity = displayCityName(base.city);
+  const reason = localSiteField(site, "reason");
   return {
     ...base,
     city: site.name,
+    displayName: localSiteField(site, "name"),
     parentCity: base.city,
     district: site.district,
+    displayDistrict: localSiteField(site, "district"),
     nodeType: site.type,
+    displayNodeType: localSiteField(site, "type"),
     stargazingScore: score,
     matchScore: score + Math.max(0, 18 - site.distanceKm * 0.12) + site.darkness * 0.08 + site.horizon * 0.05,
     viewingBand: band,
     risk: Math.max(0, Number(base.risk) + distancePenalty * 0.4 - site.darkness * 0.08),
     advice: `${site.reason}. Uses live ${base.city} weather as the dynamic forecast baseline.`,
+    displayAdvice: state.lang === "zh"
+      ? `${reason}。基于${baseCity}实时天气作为动态预报基准。`
+      : `${reason}. Uses live ${base.city} weather as the dynamic forecast baseline.`,
     localDistanceKm: site.distanceKm
   };
 }
@@ -1027,11 +1585,11 @@ function renderRecommendationCards(cards) {
     card.className = `recommendation-card rank-${index + 1}`;
     card.innerHTML = `
       <span class="rank">#${index + 1}</span>
-      <strong>${escapeHtml(node.city)}</strong>
-      <small>${escapeHtml(locationMeta(node))} · ${escapeHtml(node.nodeType)}</small>
+      <strong>${escapeHtml(displayNodeName(node))}</strong>
+      <small>${escapeHtml(locationMeta(node))} · ${escapeHtml(displayNodeType(node))}</small>
       <div class="score">${Number(node.stargazingScore).toFixed(1)}</div>
       ${weatherChips(node)}
-      <p>${escapeHtml(node.advice)}</p>
+      <p>${escapeHtml(displayAdvice(node))}</p>
       <span class="pill ${escapeHtml(node.viewingBand)}">${escapeHtml(bandLabel(node.viewingBand))}</span>
     `;
     els.recommendationCards.appendChild(card);
@@ -1045,17 +1603,33 @@ function normalizedAdminArea(node) {
 
 function locationTitle(node) {
   if (node.parentCity) {
-    return `${node.city}, ${node.parentCity}`;
+    return state.lang === "zh"
+      ? `${displayNodeName(node)}，${displayCityName(node.parentCity)}`
+      : `${displayNodeName(node)}, ${displayCityName(node.parentCity)}`;
   }
   const area = normalizedAdminArea(node);
-  return area ? `${node.city}, ${area}` : `${node.city}, ${node.country}`;
+  if (state.lang === "zh") {
+    return area
+      ? `${displayCityName(node.city)}，${displayAdminAreaName(area)}`
+      : `${displayCityName(node.city)}，${displayCountryName(node.country)}`;
+  }
+  return area ? `${displayCityName(node.city)}, ${displayAdminAreaName(area)}` : `${displayCityName(node.city)}, ${displayCountryName(node.country)}`;
 }
 
 function locationMeta(node) {
   if (node.parentCity) {
-    return [node.country, normalizedAdminArea(node), node.parentCity, node.district].filter(Boolean).join(" · ");
+    return [
+      displayCountryName(node.country),
+      displayAdminAreaName(normalizedAdminArea(node)),
+      displayCityName(node.parentCity),
+      displayDistrictName(node)
+    ].filter(Boolean).join(" · ");
   }
-  return [node.country, normalizedAdminArea(node), node.region].filter(Boolean).join(" · ");
+  return [
+    displayCountryName(node.country),
+    displayAdminAreaName(normalizedAdminArea(node)),
+    displayRegionName(node.region)
+  ].filter(Boolean).join(" · ");
 }
 
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -1099,7 +1673,7 @@ function renderMatrix() {
     cell.className = "heatmap-cell";
     cell.style.setProperty("--heat", heatColor(avgSky));
     cell.innerHTML = `
-      <strong>${escapeHtml(row.region)}</strong>
+      <strong>${escapeHtml(displayRegionName(row.region))}</strong>
       <div class="heat-swatch" style="background:${heatColor(avgSky)}">${avgSky.toFixed(0)}</div>
       <span>${row.count} ${t("nodes")}</span>
       <small>${t("matrixSky")} ${avgSky.toFixed(1)} · ${t("matrixWind")} ${Number(row.avgWind).toFixed(1)} · ${t("matrixRisk")} ${riskPct.toFixed(0)}%</small>
@@ -1128,7 +1702,7 @@ async function runRedTeam() {
   payload.tests.forEach(test => {
     const row = document.createElement("div");
     row.className = "defense-row";
-    row.innerHTML = `<strong>${escapeHtml(test.input)}</strong><br><span class="Poor">${escapeHtml(test.status)}</span>`;
+    row.innerHTML = `<strong>${escapeHtml(test.input)}</strong><br><span class="Poor">${escapeHtml(displayDefenseStatus(test.status))}</span>`;
     els.defenseList.appendChild(row);
   });
   if (state.user.role === "ADMIN") await loadAudit();
@@ -1140,14 +1714,16 @@ function initStarDome() {
   if (state.dome || !els.starDome.offsetWidth) return;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(48, els.starDome.clientWidth / els.starDome.clientHeight, 0.1, 1000);
-  camera.position.set(0, 8, 150);
+  const camera = new THREE.PerspectiveCamera(58, els.starDome.clientWidth / els.starDome.clientHeight, 0.1, 1000);
+  camera.position.set(0, 0, 178);
 
   const renderer = new THREE.WebGLRenderer({ canvas: els.starDome, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(els.starDome.clientWidth, els.starDome.clientHeight, false);
 
   const root = new THREE.Group();
+  root.position.y = -18;
+  root.scale.setScalar(0.9);
   scene.add(root);
 
   const dome = new THREE.Mesh(
@@ -1311,6 +1887,7 @@ function highlightConstellation(name) {
 function initStarsWord() {
   const columns = 68;
   const rows = 14;
+  const dragGroupSize = 3;
   els.starsGrid.innerHTML = "";
   els.starsGrid.style.setProperty("--cols", columns);
   els.starsGrid.style.setProperty("--rows", rows);
@@ -1321,9 +1898,9 @@ function initStarsWord() {
     tile.className = "stars-tile";
     tile.dataset.col = String(col);
     tile.dataset.row = String(row);
-    tile.dataset.groupCol = String(Math.floor(col / 2));
-    tile.dataset.groupRow = String(Math.floor(row / 2));
-    tile.dataset.seed = String(((Math.floor(col / 2) * 17 + Math.floor(row / 2) * 31) % 19) - 9);
+    tile.dataset.groupCol = String(Math.floor(col / dragGroupSize));
+    tile.dataset.groupRow = String(Math.floor(row / dragGroupSize));
+    tile.dataset.seed = String(((Math.floor(col / dragGroupSize) * 17 + Math.floor(row / dragGroupSize) * 31) % 19) - 9);
     tile.style.gridColumn = `${col + 1}`;
     tile.style.gridRow = `${row + 1}`;
     els.starsGrid.appendChild(tile);
@@ -1337,7 +1914,6 @@ function initStarsWord() {
     lastPointer = { x: event.clientX, y: event.clientY };
     els.starsWord.classList.add("is-dragging");
     els.starsWord.setPointerCapture?.(event.pointerId);
-    distortStars(event, true);
   });
 
   els.starsWord.addEventListener("pointerup", event => {
@@ -1347,7 +1923,8 @@ function initStarsWord() {
   });
 
   els.starsWord.addEventListener("pointermove", event => {
-    distortStars(event, pointerDown);
+    if (!pointerDown) return;
+    distortStars(event);
   });
 
   els.starsWord.addEventListener("mouseleave", () => {
@@ -1357,29 +1934,31 @@ function initStarsWord() {
     resetStarsTiles();
   });
 
-  function distortStars(event, dragging) {
+  function distortStars(event) {
     const rect = els.starsGrid.getBoundingClientRect();
     const pointerCol = ((event.clientX - rect.left) / rect.width) * (columns - 1);
     const pointerRow = ((event.clientY - rect.top) / rect.height) * (rows - 1);
     const velocityX = lastPointer ? Math.max(-70, Math.min(70, event.clientX - lastPointer.x)) : 0;
     const velocityY = lastPointer ? Math.max(-40, Math.min(40, event.clientY - lastPointer.y)) : 0;
-    const dragPower = dragging ? 1.8 : 1.0;
+    const dragDistance = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+    if (dragDistance < 1.5) return;
+    const dragPower = Math.min(1.65, 0.55 + dragDistance / 34);
     lastPointer = { x: event.clientX, y: event.clientY };
 
     els.starsGrid.querySelectorAll(".stars-tile").forEach(tile => {
-      const col = Number(tile.dataset.groupCol) * 2 + 0.5;
-      const row = Number(tile.dataset.groupRow) * 2 + 0.5;
+      const col = Number(tile.dataset.groupCol) * dragGroupSize + dragGroupSize / 2;
+      const row = Number(tile.dataset.groupRow) * dragGroupSize + dragGroupSize / 2;
       const seed = Number(tile.dataset.seed);
       const dx = col - pointerCol;
       const dy = (row - pointerRow) * 1.8;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const energy = Math.max(0, 1 - distance / 12);
+      const energy = Math.max(0, 1 - distance / 7.2) ** 1.75;
       const side = dx < 0 ? -1 : 1;
       const rowSlice = row % 2 === 0 ? 1 : -1;
-      const shiftX = energy * dragPower * (side * 82 + velocityX * 1.65 + rowSlice * seed * 4.6);
-      const shiftY = energy * dragPower * (velocityY * 0.32 - Math.sign(dy || 1) * 10);
-      tile.style.setProperty("--shift-x", `${shiftX.toFixed(1)}px`);
-      tile.style.setProperty("--shift-y", `${shiftY.toFixed(1)}px`);
+      const shiftX = energy * dragPower * (side * 58 + velocityX * 1.25 + rowSlice * seed * 2.8);
+      const shiftY = energy * dragPower * (velocityY * 0.22 - Math.sign(dy || 1) * 6);
+      tile.style.setProperty("--shift-x", `${Math.round(shiftX)}px`);
+      tile.style.setProperty("--shift-y", `${Math.round(shiftY)}px`);
       tile.style.setProperty("--energy", energy.toFixed(3));
     });
   }

@@ -4,6 +4,11 @@ users:
     salt: Z8bC1gKRu6-h8UWmtshqUkFS
     passwordHash: pbkdf2_sha256$120000$sJGArVGjFcMti4r5jpQbfbKvsMVv0h0ygClBeKTGmDY=
     createdAt: 1781438957788
+  - username: ppt
+    role: USER
+    salt: pl8GlZlj-RHTdLCs64t5LeC7
+    passwordHash: pbkdf2_sha256$120000$H20XDsD6ZsM4uIyvkmBZpsYzQLQHIFdZSysm71rxwF4=
+    createdAt: 1781462404053
   - username: admin
     role: ADMIN
     salt: HDD9JnQH_zztGGGLGlae6yuD
