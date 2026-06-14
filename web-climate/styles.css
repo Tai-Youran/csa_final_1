@@ -668,6 +668,13 @@ th {
   padding: 16px;
 }
 
+.defense-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .matrix-item,
 .audit-row,
 .defense-row {
