@@ -678,17 +678,13 @@ th {
 
 .stars-word {
   position: relative;
-  min-height: clamp(360px, 36vw, 540px);
-  margin: 22px 0 0;
+  min-height: clamp(150px, 16vw, 230px);
+  margin: 18px 0 0;
   overflow: hidden;
   border: 0;
-  border-radius: 0 0 24px 24px;
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px),
-    #20ec82;
-  background-size: 42px 42px, 42px 42px, auto;
-  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.45);
+  border-radius: 0 0 16px 16px;
+  background: #19c8ff;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -699,24 +695,26 @@ th {
 }
 
 .stars-grid {
-  --cols: 112;
-  --rows: 24;
+  --cols: 68;
+  --rows: 14;
   position: absolute;
   left: 50%;
-  bottom: clamp(14px, 2vw, 28px);
-  width: min(1500px, calc(100% - 28px));
-  transform: translateX(-50%);
+  top: 50%;
+  width: min(1640px, calc(100% - 18px));
+  transform: translate(-50%, -50%);
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(2px, 1fr));
-  grid-template-rows: repeat(var(--rows), minmax(8px, clamp(11px, 1.46vw, 24px)));
+  grid-template-rows: repeat(var(--rows), minmax(12px, clamp(13px, 1.18vw, 21px)));
   gap: 0;
   perspective: 900px;
 }
 
 .stars-tile {
   opacity: 1;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
   background: #020302;
-  transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0) scale(var(--scale, 1));
+  transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0);
   transform-origin: center;
   transition: transform 170ms cubic-bezier(.2, .9, .22, 1), opacity 170ms ease;
   will-change: transform;

@@ -241,6 +241,27 @@ const constellations = [
   })
 ];
 
+const LOCAL_OBSERVING_SITES = {
+  "China|Shanghai|Shanghai": [
+    { name: "Dishui Lake", district: "Pudong / Lingang", type: "Lake Horizon", distanceKm: 70, darkness: 76, horizon: 94, access: 88, reason: "open water horizon and fewer skyline obstructions than central Shanghai" },
+    { name: "Dongtan Wetland Park", district: "Chongming", type: "Wetland Reserve", distanceKm: 63, darkness: 82, horizon: 86, access: 74, reason: "lower light spill and broad eastern sky views" },
+    { name: "Sheshan Observatory Area", district: "Songjiang", type: "Observatory Hill", distanceKm: 35, darkness: 68, horizon: 78, access: 92, reason: "historic astronomy site with slightly elevated terrain" },
+    { name: "Dongping National Forest Park", district: "Chongming", type: "Forest Edge", distanceKm: 75, darkness: 80, horizon: 72, access: 78, reason: "darker park surroundings away from the urban core" },
+    { name: "Nanhuizui Sea-Viewing Park", district: "Pudong / Lingang", type: "Coastal Edge", distanceKm: 73, darkness: 74, horizon: 96, access: 84, reason: "clear southeast horizon over open sea" },
+    { name: "Fengxian Bay Forest Park", district: "Fengxian", type: "Coastal Forest", distanceKm: 49, darkness: 70, horizon: 82, access: 84, reason: "coastal air exposure and less dense high-rise lighting" },
+    { name: "Qingxi Country Park", district: "Qingpu", type: "Country Park", distanceKm: 50, darkness: 72, horizon: 70, access: 82, reason: "suburban park setting with calmer local light conditions" },
+    { name: "Changxing Island Country Park", district: "Chongming", type: "Island Park", distanceKm: 39, darkness: 66, horizon: 76, access: 82, reason: "river-island spacing reduces some central-city glare" },
+    { name: "Jinshan City Beach", district: "Jinshan", type: "Coastal Horizon", distanceKm: 64, darkness: 69, horizon: 92, access: 80, reason: "wide southern horizon for Moon, planets, and bright constellations" },
+    { name: "Yangshan Coast Viewpoint", district: "Pudong / Offshore", type: "Deep-Water Coast", distanceKm: 92, darkness: 84, horizon: 98, access: 58, reason: "best darkness and sea horizon, but farther from the city center" }
+  ],
+  "China|Beijing|Beijing": [
+    { name: "Miyun Reservoir North Shore", district: "Miyun", type: "Reservoir Horizon", distanceKm: 88, darkness: 86, horizon: 88, access: 72, reason: "waterfront horizon and darker northern suburbs" },
+    { name: "Huairou Mountain Edge", district: "Huairou", type: "Mountain Edge", distanceKm: 72, darkness: 82, horizon: 78, access: 76, reason: "mountain-air setting with lower urban glow" },
+    { name: "Yanqing Wild Duck Lake", district: "Yanqing", type: "Wetland Reserve", distanceKm: 82, darkness: 84, horizon: 86, access: 74, reason: "open wetland sky and less dense lighting" },
+    { name: "Mentougou Tanzhe Area", district: "Mentougou", type: "Western Hills", distanceKm: 48, darkness: 74, horizon: 70, access: 82, reason: "nearby western escape from central light pollution" }
+  ]
+};
+
 els.loginForm.addEventListener("submit", login);
 els.loginModeBtn.addEventListener("click", () => setAuthMode("login"));
 els.signupModeBtn.addEventListener("click", () => setAuthMode("signup"));
@@ -403,7 +424,7 @@ function renderNodes() {
 
   els.bestTonight.textContent = rows[0] ? locationTitle(rows[0]) : "Select location";
   renderRecommendationCards(rows.slice(0, 3));
-  els.recordCount.textContent = `${rows.length} matched records`;
+  els.recordCount.textContent = `${rows.length} local sites`;
   els.nodeBody.innerHTML = "";
   if (!state.selectedCountry || !state.selectedAdminArea || !state.selectedCity) {
     els.nodeBody.innerHTML = `<tr><td colspan="8">Select country, province/state, and city first to generate matched observing sites.</td></tr>`;
@@ -529,10 +550,10 @@ function updateLocationHint() {
     return;
   }
   if (!state.selectedCity) {
-    els.locationHint.textContent = `Choose a city in ${state.selectedAdminArea}, ${state.selectedCountry} to calculate location-weighted matches.`;
+    els.locationHint.textContent = `Choose a city in ${state.selectedAdminArea}, ${state.selectedCountry} to rank local observing sites.`;
     return;
   }
-  els.locationHint.textContent = `Recommendations are now matched to ${state.selectedCity}, ${state.selectedAdminArea}, ${state.selectedCountry}.`;
+  els.locationHint.textContent = `Recommendations now show observing sites inside ${state.selectedCity}, using live ${state.selectedCity} weather.`;
 }
 
 function getRecommendedNodes() {
@@ -543,27 +564,73 @@ function getRecommendedNodes() {
   const base = state.nodes.find(node => node.country === state.selectedCountry
     && (normalizedAdminArea(node) || "Unspecified") === state.selectedAdminArea
     && node.city === state.selectedCity);
-  const sameAdminArea = state.nodes.filter(node => node.country === state.selectedCountry
-    && (normalizedAdminArea(node) || "Unspecified") === state.selectedAdminArea);
-  const sameCountry = state.nodes.filter(node => node.country === state.selectedCountry);
-  const pool = sameAdminArea.length >= 10 ? sameAdminArea : sameCountry.length >= 10 ? sameCountry : state.nodes;
+  if (!base) {
+    return [];
+  }
 
-  return pool
-    .map(node => ({ ...node, matchScore: calculateMatchScore(node, base) }))
+  return getLocalSites(base)
+    .map(site => buildLocalSiteNode(site, base))
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, 10);
 }
 
-function calculateMatchScore(node, base) {
-  let score = Number(node.stargazingScore) || 0;
-  if (node.country === state.selectedCountry) score += 18;
-  if ((normalizedAdminArea(node) || "Unspecified") === state.selectedAdminArea) score += 18;
-  if (node.city === state.selectedCity) score += 12;
-  if (base && Number.isFinite(Number(node.latitude)) && Number.isFinite(Number(base.latitude))) {
-    const distance = haversineKm(Number(base.latitude), Number(base.longitude), Number(node.latitude), Number(node.longitude));
-    score += Math.max(0, 28 - distance / 120);
+function getLocalSites(base) {
+  const key = `${base.country}|${normalizedAdminArea(base) || "Unspecified"}|${base.city}`;
+  return LOCAL_OBSERVING_SITES[key] || genericLocalSites(base);
+}
+
+function genericLocalSites(base) {
+  const city = base.city;
+  return [
+    { name: `${city} Reservoir Horizon`, district: "outer water edge", type: "Water Horizon", distanceKm: 32, darkness: 72, horizon: 90, access: 78, reason: "open water gives a cleaner horizon than dense downtown blocks" },
+    { name: `${city} Country Park Edge`, district: "suburban park", type: "Country Park", distanceKm: 28, darkness: 70, horizon: 76, access: 84, reason: "park surroundings reduce direct streetlight glare" },
+    { name: `${city} Northern Outskirts`, district: "outer district", type: "Suburban Edge", distanceKm: 42, darkness: 76, horizon: 72, access: 70, reason: "farther from the urban light dome while still reachable" },
+    { name: `${city} Coastal Viewpoint`, district: "coastal / river edge", type: "Coastal Horizon", distanceKm: 38, darkness: 68, horizon: 92, access: 78, reason: "wide horizon helps for planets and low constellations" },
+    { name: `${city} Observatory Area`, district: "science campus", type: "Education Site", distanceKm: 18, darkness: 62, horizon: 74, access: 92, reason: "easy access and good for public observing demos" },
+    { name: `${city} Forest Park`, district: "forest park", type: "Forest Edge", distanceKm: 34, darkness: 74, horizon: 68, access: 78, reason: "tree cover blocks local lights, best for high-altitude targets" },
+    { name: `${city} Riverside Open Space`, district: "riverfront", type: "Riverfront", distanceKm: 16, darkness: 58, horizon: 88, access: 94, reason: "not the darkest, but easy to reach and has open sky" },
+    { name: `${city} Western Hills Edge`, district: "higher ground", type: "Highland Edge", distanceKm: 52, darkness: 80, horizon: 70, access: 62, reason: "higher terrain can escape haze and central light spill" },
+    { name: `${city} Agricultural Belt`, district: "rural edge", type: "Rural Edge", distanceKm: 58, darkness: 82, horizon: 78, access: 58, reason: "darker surroundings with fewer commercial lights" },
+    { name: `${city} Campus Sports Field`, district: "campus / school", type: "Campus Field", distanceKm: 8, darkness: 50, horizon: 82, access: 96, reason: "good for quick student demos when travel time matters" }
+  ];
+}
+
+function buildLocalSiteNode(site, base) {
+  const weatherScore = Number(base.stargazingScore) || 0;
+  const localQuality = site.darkness * 0.46 + site.horizon * 0.34 + site.access * 0.2;
+  const distancePenalty = Math.min(18, site.distanceKm * 0.16);
+  const score = clamp(weatherScore * 0.68 + localQuality * 0.32 - distancePenalty, 0, 100);
+  const band = viewingBandFromScore(score);
+  return {
+    ...base,
+    city: site.name,
+    parentCity: base.city,
+    district: site.district,
+    nodeType: site.type,
+    stargazingScore: score,
+    matchScore: score + Math.max(0, 18 - site.distanceKm * 0.12) + site.darkness * 0.08 + site.horizon * 0.05,
+    viewingBand: band,
+    risk: Math.max(0, Number(base.risk) + distancePenalty * 0.4 - site.darkness * 0.08),
+    advice: `${site.reason}. Uses live ${base.city} weather as the dynamic forecast baseline.`,
+    localDistanceKm: site.distanceKm
+  };
+}
+
+function viewingBandFromScore(score) {
+  if (score >= 82) {
+    return "Prime";
   }
-  return score;
+  if (score >= 65) {
+    return "Good";
+  }
+  if (score >= 45) {
+    return "Marginal";
+  }
+  return "Poor";
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function renderRecommendationCards(cards) {
@@ -593,11 +660,17 @@ function normalizedAdminArea(node) {
 }
 
 function locationTitle(node) {
+  if (node.parentCity) {
+    return `${node.city}, ${node.parentCity}`;
+  }
   const area = normalizedAdminArea(node);
   return area ? `${node.city}, ${area}` : `${node.city}, ${node.country}`;
 }
 
 function locationMeta(node) {
+  if (node.parentCity) {
+    return [node.country, normalizedAdminArea(node), node.parentCity, node.district].filter(Boolean).join(" · ");
+  }
   return [node.country, normalizedAdminArea(node), node.region].filter(Boolean).join(" · ");
 }
 
@@ -829,8 +902,8 @@ function highlightConstellation(name) {
 }
 
 function initStarsWord() {
-  const columns = 112;
-  const rows = 24;
+  const columns = 68;
+  const rows = 14;
   els.starsGrid.innerHTML = "";
   els.starsGrid.style.setProperty("--cols", columns);
   els.starsGrid.style.setProperty("--rows", rows);
@@ -841,7 +914,9 @@ function initStarsWord() {
     tile.className = "stars-tile";
     tile.dataset.col = String(col);
     tile.dataset.row = String(row);
-    tile.dataset.seed = String(((col * 17 + row * 31) % 19) - 9);
+    tile.dataset.groupCol = String(Math.floor(col / 2));
+    tile.dataset.groupRow = String(Math.floor(row / 2));
+    tile.dataset.seed = String(((Math.floor(col / 2) * 17 + Math.floor(row / 2) * 31) % 19) - 9);
     tile.style.gridColumn = `${col + 1}`;
     tile.style.gridRow = `${row + 1}`;
     els.starsGrid.appendChild(tile);
@@ -885,21 +960,19 @@ function initStarsWord() {
     lastPointer = { x: event.clientX, y: event.clientY };
 
     els.starsGrid.querySelectorAll(".stars-tile").forEach(tile => {
-      const col = Number(tile.dataset.col);
-      const row = Number(tile.dataset.row);
+      const col = Number(tile.dataset.groupCol) * 2 + 0.5;
+      const row = Number(tile.dataset.groupRow) * 2 + 0.5;
       const seed = Number(tile.dataset.seed);
       const dx = col - pointerCol;
       const dy = (row - pointerRow) * 1.8;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const energy = Math.max(0, 1 - distance / 19);
+      const energy = Math.max(0, 1 - distance / 12);
       const side = dx < 0 ? -1 : 1;
       const rowSlice = row % 2 === 0 ? 1 : -1;
-      const shiftX = energy * dragPower * (side * 90 + velocityX * 1.9 + rowSlice * seed * 5);
-      const shiftY = energy * dragPower * (velocityY * 0.35 - Math.sign(dy || 1) * 11);
-      const scale = 1 + energy * 0.05;
+      const shiftX = energy * dragPower * (side * 82 + velocityX * 1.65 + rowSlice * seed * 4.6);
+      const shiftY = energy * dragPower * (velocityY * 0.32 - Math.sign(dy || 1) * 10);
       tile.style.setProperty("--shift-x", `${shiftX.toFixed(1)}px`);
       tile.style.setProperty("--shift-y", `${shiftY.toFixed(1)}px`);
-      tile.style.setProperty("--scale", scale.toFixed(3));
       tile.style.setProperty("--energy", energy.toFixed(3));
     });
   }
@@ -908,7 +981,6 @@ function initStarsWord() {
     els.starsGrid.querySelectorAll(".stars-tile").forEach(tile => {
       tile.style.setProperty("--shift-x", "0px");
       tile.style.setProperty("--shift-y", "0px");
-      tile.style.setProperty("--scale", "1");
       tile.style.setProperty("--energy", "0");
     });
   }

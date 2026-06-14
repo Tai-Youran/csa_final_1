@@ -301,6 +301,23 @@ Make the letters clear before interaction, then add stronger drag/glitch motion 
 
 ---
 
+## Prompt #18 — City-Local Stargazing Site Recommendations
+
+**日期：** 2026-06-14
+
+**Prompt：**
+```
+Fix @web-climate/app.js recommendation logic.
+If the user selects Shanghai, the Top 3 should be Shanghai observing places, not other cities like Wuhan or Hefei.
+Use the selected city's live weather as the dynamic baseline, then rank local observing sites inside that city.
+Add curated Shanghai local sites such as Dishui Lake, Dongtan Wetland Park, Sheshan Observatory Area, Chongming/Dongping, and Nanhuizui.
+Keep the dashboard, login, admin, red-team, and dynamic weather scraper intact.
+```
+
+**结果：** Changed the recommendation layer from cross-city weather nodes to city-local observing sites, added a curated Shanghai site set, kept live Shanghai weather as the dynamic forecast baseline, and updated UI labels to show local site recommendations.
+
+---
+
 ## 错误 Prompt 记录（反面教材）
 
 | # | 错误 Prompt | 为什么失败 |
