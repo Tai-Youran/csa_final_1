@@ -239,6 +239,7 @@ public class ClimateShieldWebMain {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         Map<String, String> form = parseForm(body);
         String action = "submit".equals(form.get("action")) ? "submit" : "draft";
+        String applicationId = form.getOrDefault("id", "").trim();
         Map<String, String> application;
         try {
             application = buildApplication(session, form, action);
@@ -249,7 +250,30 @@ public class ClimateShieldWebMain {
         }
 
         List<Map<String, String>> applications = readSiteApplications();
-        applications.add(application);
+        if (applicationId.isEmpty()) {
+            applications.add(application);
+        } else {
+            Map<String, String> existing = null;
+            for (Map<String, String> candidate : applications) {
+                if (applicationId.equals(candidate.get("id"))
+                        && session.getUsername().equals(candidate.get("username"))) {
+                    existing = candidate;
+                    break;
+                }
+            }
+            if (existing == null) {
+                send(exchange, 404, "application/json", "{\"error\":\"APPLICATION_NOT_FOUND\"}");
+                return;
+            }
+            if (!"DRAFT".equals(existing.get("status"))) {
+                send(exchange, 400, "application/json", "{\"error\":\"APPLICATION_LOCKED\"}");
+                return;
+            }
+            application.put("id", existing.get("id"));
+            application.put("createdAt", existing.getOrDefault("createdAt", application.get("createdAt")));
+            existing.clear();
+            existing.putAll(application);
+        }
         writeSiteApplications(applications);
         audit("SITE_APPLICATION_" + application.get("status") + " username=" + session.getUsername()
                 + " site=" + application.get("name"));

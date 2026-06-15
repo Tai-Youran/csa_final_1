@@ -12,6 +12,7 @@ const state = {
   applications: [],
   approvedSites: [],
   currentView: "dashboard",
+  editingApplicationId: "",
   lang: localStorage.getItem("starscope-lang") || "zh"
 };
 
@@ -69,11 +70,13 @@ const I18N = {
     appSiteName: "地点名称", appCountry: "国家", appAdmin: "省 / 州", appCity: "城市",
     appDistrict: "区县 / 位置", appType: "地点类型", appReason: "为什么适合观星",
     btnSaveDraft: "保存草稿", btnSubmitApplication: "提交审核",
+    btnEditDraft: "编辑", btnSubmitDraft: "提交此草稿",
     draftBox: "草稿箱", draftTag: "未提交", progressBox: "申请进程", progressTag: "审核状态",
     emptyDrafts: "还没有草稿。填写模板后点击保存草稿。",
     emptyProgress: "还没有提交审核的地点。",
     emptyAdminApplications: "暂无待处理申请。",
     statusDraftSaved: "草稿已保存。",
+    statusDraftLoaded: "草稿已载入模板，可以修改后保存或提交。",
     statusSubmitted: "申请已提交给管理员审核。",
     statusApplicationError: "申请保存失败",
     statusExporting: "正在导出实时观星数据…",
@@ -154,11 +157,13 @@ const I18N = {
     appSiteName: "Site Name", appCountry: "Country", appAdmin: "Province / State", appCity: "City",
     appDistrict: "District / Area", appType: "Site Type", appReason: "Why it works for stargazing",
     btnSaveDraft: "Save Draft", btnSubmitApplication: "Submit for Review",
+    btnEditDraft: "Edit", btnSubmitDraft: "Submit Draft",
     draftBox: "Draft Box", draftTag: "Not submitted", progressBox: "Application Progress", progressTag: "Review state",
     emptyDrafts: "No drafts yet. Fill the template and save a draft.",
     emptyProgress: "No submitted sites yet.",
     emptyAdminApplications: "No site applications waiting for review.",
     statusDraftSaved: "Draft saved.",
+    statusDraftLoaded: "Draft loaded into the template. Edit it, save it, or submit it.",
     statusSubmitted: "Application submitted for admin review.",
     statusApplicationError: "Application save failed",
     statusExporting: "Exporting live stargazing data…",
@@ -984,6 +989,16 @@ function setTheme(theme) {
     els.loginThemeToggle.textContent = label;
     els.loginThemeToggle.setAttribute("aria-label", t("themeAria"));
   }
+  applyDomeTheme();
+}
+
+function applyDomeTheme() {
+  if (!state.dome) return;
+  const isLight = document.body.dataset.theme === "light";
+  state.dome.renderer.setClearColor(isLight ? 0xf8fbff : 0x02040a, isLight ? 1 : 0);
+  state.dome.dome.material.color.setHex(isLight ? 0x8fb4e8 : 0x132235);
+  state.dome.dome.material.opacity = isLight ? 0.22 : 0.32;
+  state.dome.scene.background = isLight ? new THREE.Color(0xf8fbff) : null;
 }
 
 async function loadClimate() {
@@ -1053,6 +1068,9 @@ async function loadApplications() {
 
 async function saveSiteApplication(action) {
   const form = new FormData(els.siteApplicationForm);
+  if (state.editingApplicationId) {
+    form.set("id", state.editingApplicationId);
+  }
   form.set("country", canonicalLabel("countries", form.get("country")));
   form.set("adminArea", canonicalLabel("adminAreas", form.get("adminArea")));
   form.set("city", canonicalLabel("cities", form.get("city")));
@@ -1068,8 +1086,33 @@ async function saveSiteApplication(action) {
   }
   els.applicationStatus.textContent = action === "draft" ? t("statusDraftSaved") : t("statusSubmitted");
   els.siteApplicationForm.reset();
+  state.editingApplicationId = "";
   await loadApplications();
   if (state.user.role === "ADMIN") await loadAdminApplications();
+}
+
+async function submitSavedDraft(application) {
+  state.editingApplicationId = application.id;
+  setApplicationForm(application);
+  await saveSiteApplication("submit");
+}
+
+function editSavedDraft(application) {
+  state.editingApplicationId = application.id;
+  setApplicationForm(application);
+  els.applicationStatus.textContent = t("statusDraftLoaded");
+  els.siteApplicationForm.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function setApplicationForm(application) {
+  const form = els.siteApplicationForm;
+  form.elements.name.value = application.name || "";
+  form.elements.country.value = displayCountryName(application.country || "");
+  form.elements.adminArea.value = displayAdminAreaName(application.adminArea || "");
+  form.elements.city.value = displayCityName(application.city || "");
+  form.elements.district.value = application.district || "";
+  form.elements.type.value = application.type || "";
+  form.elements.reason.value = application.reason || "";
 }
 
 function renderProfile() {
@@ -1090,11 +1133,11 @@ function renderProfile() {
   els.profileDraftCount.textContent = drafts.length;
   els.profilePendingCount.textContent = pending.length;
   els.profileApprovedCount.textContent = approved.length;
-  renderApplicationList(els.draftList, drafts, t("emptyDrafts"));
+  renderApplicationList(els.draftList, drafts, t("emptyDrafts"), false, true);
   renderApplicationList(els.progressList, state.applications.filter(item => item.status !== "DRAFT"), t("emptyProgress"));
 }
 
-function renderApplicationList(container, applications, emptyText, adminMode = false) {
+function renderApplicationList(container, applications, emptyText, adminMode = false, draftMode = false) {
   container.innerHTML = "";
   if (!applications.length) {
     container.innerHTML = `<p class="defense-empty">${escapeHtml(emptyText)}</p>`;
@@ -1126,6 +1169,17 @@ function renderApplicationList(container, applications, emptyText, adminMode = f
       });
       row.appendChild(actions);
     }
+    if (draftMode && application.status === "DRAFT") {
+      const actions = document.createElement("div");
+      actions.className = "review-actions draft-actions";
+      actions.innerHTML = `
+        <button type="button" data-draft-action="edit">${escapeHtml(t("btnEditDraft"))}</button>
+        <button type="button" data-draft-action="submit">${escapeHtml(t("btnSubmitDraft"))}</button>
+      `;
+      actions.querySelector("[data-draft-action='edit']").addEventListener("click", () => editSavedDraft(application));
+      actions.querySelector("[data-draft-action='submit']").addEventListener("click", () => submitSavedDraft(application));
+      row.appendChild(actions);
+    }
     container.appendChild(row);
   });
 }
@@ -1135,7 +1189,8 @@ async function loadAdminApplications() {
   const response = await fetch("/api/admin/site-applications");
   if (!response.ok) return;
   const payload = await response.json();
-  const pendingFirst = (payload.applications || []).slice().sort((a, b) => {
+  const reviewable = (payload.applications || []).filter(application => application.status === "PENDING");
+  const pendingFirst = reviewable.slice().sort((a, b) => {
     const weight = { PENDING: 0, DRAFT: 1, APPROVED: 2, REJECTED: 3 };
     return (weight[a.status] ?? 9) - (weight[b.status] ?? 9);
   });
@@ -1148,7 +1203,7 @@ function renderAdminReviewList(container, applications) {
   container.innerHTML = "";
   const reviewable = applications.filter(application =>
     application.username !== state.user.username
-      && (application.status === "PENDING" || application.status === "DRAFT")
+      && application.status === "PENDING"
   );
   if (!reviewable.length) {
     container.innerHTML = `<p class="defense-empty">${escapeHtml(t("adminReviewEmpty"))}</p>`;
@@ -1828,7 +1883,8 @@ function initStarDome() {
     requestAnimationFrame(animate);
   }
   animate();
-  state.dome = { scene, camera, renderer, constellationObjects };
+  state.dome = { scene, camera, renderer, dome, constellationObjects };
+  applyDomeTheme();
   selectConstellation("Orion");
 }
 
@@ -1906,43 +1962,34 @@ function initStarsWord() {
     els.starsGrid.appendChild(tile);
   });
 
-  let pointerDown = false;
   let lastPointer = null;
 
-  els.starsWord.addEventListener("pointerdown", event => {
-    pointerDown = true;
+  els.starsWord.addEventListener("pointerenter", event => {
     lastPointer = { x: event.clientX, y: event.clientY };
-    els.starsWord.classList.add("is-dragging");
-    els.starsWord.setPointerCapture?.(event.pointerId);
-  });
-
-  els.starsWord.addEventListener("pointerup", event => {
-    pointerDown = false;
-    els.starsWord.classList.remove("is-dragging");
-    els.starsWord.releasePointerCapture?.(event.pointerId);
+    els.starsWord.classList.add("is-active");
+    distortStars(event, true);
   });
 
   els.starsWord.addEventListener("pointermove", event => {
-    if (!pointerDown) return;
     distortStars(event);
   });
 
   els.starsWord.addEventListener("mouseleave", () => {
     lastPointer = null;
-    pointerDown = false;
-    els.starsWord.classList.remove("is-dragging");
+    els.starsWord.classList.remove("is-active");
     resetStarsTiles();
   });
 
-  function distortStars(event) {
+  function distortStars(event, force = false) {
     const rect = els.starsGrid.getBoundingClientRect();
     const pointerCol = ((event.clientX - rect.left) / rect.width) * (columns - 1);
     const pointerRow = ((event.clientY - rect.top) / rect.height) * (rows - 1);
     const velocityX = lastPointer ? Math.max(-70, Math.min(70, event.clientX - lastPointer.x)) : 0;
     const velocityY = lastPointer ? Math.max(-40, Math.min(40, event.clientY - lastPointer.y)) : 0;
     const dragDistance = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-    if (dragDistance < 1.5) return;
-    const dragPower = Math.min(1.65, 0.55 + dragDistance / 34);
+    const effectPower = force || dragDistance < 1.5 ? 0.76 : Math.min(1.75, 0.55 + dragDistance / 32);
+    const motionX = dragDistance < 1.5 ? 0 : velocityX * 1.18;
+    const motionY = dragDistance < 1.5 ? 0 : velocityY * 0.2;
     lastPointer = { x: event.clientX, y: event.clientY };
 
     els.starsGrid.querySelectorAll(".stars-tile").forEach(tile => {
@@ -1955,8 +2002,8 @@ function initStarsWord() {
       const energy = Math.max(0, 1 - distance / 7.2) ** 1.75;
       const side = dx < 0 ? -1 : 1;
       const rowSlice = row % 2 === 0 ? 1 : -1;
-      const shiftX = energy * dragPower * (side * 58 + velocityX * 1.25 + rowSlice * seed * 2.8);
-      const shiftY = energy * dragPower * (velocityY * 0.22 - Math.sign(dy || 1) * 6);
+      const shiftX = energy * effectPower * (side * 58 + motionX + rowSlice * seed * 2.8);
+      const shiftY = energy * effectPower * (motionY - Math.sign(dy || 1) * 6);
       tile.style.setProperty("--shift-x", `${Math.round(shiftX)}px`);
       tile.style.setProperty("--shift-y", `${Math.round(shiftY)}px`);
       tile.style.setProperty("--energy", energy.toFixed(3));

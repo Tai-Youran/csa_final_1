@@ -1116,6 +1116,14 @@ th {
   background-size: 34px 34px, 34px 34px, auto;
 }
 
+body[data-theme="light"] .sky-stage {
+  background:
+    linear-gradient(rgba(17, 24, 39, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 36%, #dbeafe 0%, #eef6ff 62%, #f8fbff 100%);
+  background-size: 34px 34px, 34px 34px, auto;
+}
+
 #starDome {
   display: block;
   width: 100%;
@@ -1168,13 +1176,13 @@ th {
   border-radius: 0 0 16px 16px;
   background: #19c8ff;
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
-  cursor: grab;
+  cursor: crosshair;
   user-select: none;
   touch-action: none;
 }
 
-.stars-word.is-dragging {
-  cursor: grabbing;
+.stars-word.is-active {
+  cursor: crosshair;
 }
 
 .stars-grid {
@@ -1205,7 +1213,7 @@ th {
   will-change: transform;
 }
 
-.stars-word.is-dragging .stars-tile {
+.stars-word.is-active .stars-tile {
   transition-duration: 35ms;
 }
 
