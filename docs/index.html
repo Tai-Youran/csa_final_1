@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarScope 观星雷达</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="dark">
+  <div id="loadingOverlay" class="loading-overlay hidden" aria-live="polite">
+    <div class="loading-card">
+      <p id="loadingText" data-i18n="loadingWeather">正在获取 72+ 节点天气…</p>
+      <div class="loading-track"><div id="loadingBar" class="loading-fill"></div></div>
+      <span id="loadingPercent">0%</span>
+    </div>
+  </div>
+
+  <section id="loginView" class="login-shell">
+    <button id="loginThemeToggle" class="theme-toggle login-theme" type="button" aria-label="切换主题">浅色</button>
+    <button id="loginLangToggle" class="theme-toggle login-lang" type="button">EN</button>
+    <div class="login-copy">
+      <div class="login-orbit" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <p class="eyebrow" data-i18n="loginEyebrow">实时天文观测规划</p>
+      <h1>StarScope</h1>
+      <p class="lede" data-i18n="loginLede">基于角色的观星雷达，把实时天气转化为今晚最佳观测窗口。</p>
+      <div class="hero-readout">
+        <span data-i18n="heroWeather">动态天气</span>
+        <span data-i18n="heroRoles">角色权限</span>
+        <span data-i18n="heroDome">3D 星座穹顶</span>
+      </div>
+      <p class="lede" style="margin-top:18px; font-size:14px;">
+        <strong>提示：</strong>这是 GitHub Pages 静态演示版，会使用内置示例数据（不需要运行 Java 后端）。
+      </p>
+    </div>
+    <form id="loginForm" class="login-card">
+      <div class="auth-tabs">
+        <button id="loginModeBtn" class="is-active" type="button" data-i18n="tabLogin">登录</button>
+        <button id="signupModeBtn" type="button" data-i18n="tabSignup">注册</button>
+      </div>
+      <h2 id="authTitle" data-i18n="authLogin">安全登录</h2>
+      <label><span data-i18n="labelUsername">用户名</span> <input name="username" autocomplete="username" required></label>
+      <label><span data-i18n="labelPassword">密码</span> <input id="passwordInput" name="password" type="password" autocomplete="current-password" required></label>
+      <div id="passwordStrength" class="password-strength hidden">
+        <div class="strength-bar"><span id="strengthFill"></span></div>
+        <small id="strengthLabel"></small>
+      </div>
+      <label id="confirmPasswordLabel" class="hidden"><span data-i18n="labelConfirm">确认密码</span> <input name="confirmPassword" type="password" autocomplete="new-password"></label>
+      <p id="passwordRule" class="password-rule hidden" data-i18n="passwordRule">密码至少 6 位，且同时包含字母和数字。</p>
+      <button id="authSubmitBtn" type="submit" data-i18n="btnEnter">进入仪表盘</button>
+      <p id="loginError" class="error"></p>
+    </form>
+  </section>
+
+  <section id="appView" class="app hidden">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" data-i18n="appEyebrow">StarScope 观测雷达</p>
+        <h1 data-i18n="appTitle">今晚观星窗口</h1>
+      </div>
+      <div class="user-box">
+        <span id="roleBadge">角色</span>
+        <strong id="usernameLabel">用户</strong>
+        <button id="dashboardNavBtn" class="theme-toggle" type="button" data-i18n="navDashboard">观测台</button>
+        <button id="profileNavBtn" class="theme-toggle" type="button" data-i18n="navProfile">个人主页</button>
+        <button id="langToggle" class="theme-toggle" type="button">EN</button>
+        <button id="themeToggle" class="theme-toggle" type="button">浅色</button>
+        <button id="logoutBtn" type="button" data-i18n="btnLogout">退出</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="dashboardView">
+      <section class="metrics">
+        <div><span data-i18n="metricNodes">预报节点</span><strong id="nodeCount">--</strong></div>
+        <div><span data-i18n="metricGeo">地理编码池</span><strong id="geoCount">--</strong></div>
+        <div><span data-i18n="metricPrime">优质窗口</span><strong id="criticalCount">--</strong></div>
+        <div><span data-i18n="metricBest">今晚最佳</span><strong id="leadRisk">加载中...</strong></div>
+      </section>
+
+      <section class="location-console">
+        <div>
+          <p class="eyebrow" data-i18n="locEyebrow">从位置开始</p>
+          <h2 data-i18n="locTitle">你在哪里观测？</h2>
+          <p id="locationHint">请先选择国家、省/州和城市，系统将推荐附近最佳观星点。</p>
+        </div>
+        <div class="location-controls">
+          <label><span data-i18n="labelCountry">国家</span>
+            <select id="countrySelect">
+              <option value="" data-i18n="optCountry">选择国家</option>
+            </select>
+          </label>
+          <label><span data-i18n="labelAdmin">省 / 州</span>
+            <select id="adminAreaSelect" disabled>
+              <option value="" data-i18n="optAdmin">选择省/州</option>
+            </select>
+          </label>
+          <label><span data-i18n="labelCity">城市</span>
+            <select id="citySelect" disabled>
+              <option value="" data-i18n="optCity">选择城市</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="top-picks">
+        <div class="panel-head">
+          <h2 data-i18n="topPicks">本地前三推荐</h2>
+          <span data-i18n="topPicksTag">同城</span>
+        </div>
+        <div id="recommendationCards" class="recommendation-cards"></div>
+      </section>
+
+      <section class="toolbar">
+        <label><span data-i18n="labelSort">排序</span>
+          <select id="sortSelect">
+              <option value="matchScore" data-i18n="sortMatch">最佳匹配</option>
+              <option value="stargazingScore" data-i18n="sortScore">观星评分</option>
+              <option value="risk" data-i18n="sortRisk">天气阻碍</option>
+              <option value="wind" data-i18n="sortWind">风速</option>
+              <option value="precipitation" data-i18n="sortRain">降水量</option>
+              <option value="temperature" data-i18n="sortTemp">温度</option>
+          </select>
+        </label>
+        <label><span data-i18n="labelBand">观星等级</span>
+          <select id="riskSelect">
+            <option value="All" data-i18n="bandAll">全部</option>
+            <option value="Prime" data-i18n="bandPrime">极佳</option>
+            <option value="Good" data-i18n="bandGood">良好</option>
+            <option value="Marginal" data-i18n="bandMarginal">一般</option>
+            <option value="Poor" data-i18n="bandPoor">较差</option>
+          </select>
+        </label>
+        <button id="refreshBtn" type="button" data-i18n="btnRefresh">刷新预报</button>
+        <button id="exportBtn" type="button" data-i18n="btnExport">导出数据</button>
+        <button id="redTeamBtn" type="button" data-i18n="btnRedTeam">红队测试</button>
+        <p id="statusLine">等待登录…</p>
+      </section>
+
+      <section id="defensePanel" class="panel defense-panel">
+        <div class="panel-head">
+          <h2 data-i18n="defenseTitle">输入安全测试</h2>
+          <span data-i18n="defenseTag">InputSanitizer</span>
+        </div>
+        <div id="defenseList" class="defense-list"></div>
+      </section>
+
+      <section class="sky-panel">
+        <div class="sky-copy">
+          <p class="eyebrow" data-i18n="domeEyebrow">交互式星座穹顶</p>
+          <h2 data-i18n="domeTitle">3D 夜空地图</h2>
+          <p data-i18n="domeDesc">拖动旋转穹顶。星座按相对大小显示，点击可查看观测说明。</p>
+          <div id="constellationInfo" class="constellation-info">
+            <strong>猎户座</strong>
+            <span>点击星座查看观测说明</span>
+          </div>
+        </div>
+        <div class="sky-stage">
+          <canvas id="starDome"></canvas>
+          <div id="constellationButtons" class="constellation-buttons"></div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel wide">
+          <div class="panel-head">
+            <h2 data-i18n="tableTitle">推荐观测点</h2>
+            <span id="recordCount">0 个本地站点</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th data-i18n="thSite">地点</th>
+                  <th data-i18n="thType">类型</th>
+                  <th data-i18n="thViewing">等级</th>
+                  <th data-i18n="thScore">评分</th>
+                  <th data-i18n="thTemp">温度</th>
+                  <th data-i18n="thWind">风速</th>
+                  <th data-i18n="thRain">降水</th>
+                </tr>
+              </thead>
+              <tbody id="nodeBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="matrixTitle">天空质量热力图</h2>
+            <span data-i18n="matrixTag">2D 矩阵</span>
+          </div>
+          <div id="matrixLegend" class="matrix-legend"></div>
+          <div id="matrixList" class="matrix-list heatmap-grid"></div>
+        </aside>
+      </section>
+      </div>
+
+      <section id="profileView" class="profile-view hidden">
+        <div class="profile-hero">
+          <p id="profileEyebrowText" class="eyebrow" data-i18n="profileEyebrow">个人观星档案</p>
+          <h2 id="profileTitleText" data-i18n="profileTitle">我的 StarScope 空间</h2>
+          <p id="profileNoteText" data-i18n="profileNote">管理你的账号信息、地点草稿、审核进程，并把适合观星的地点提交给管理员。</p>
+        </div>
+        <div id="userProfileGrid" class="profile-grid">
+          <section class="panel profile-card">
+            <div class="panel-head">
+              <h2 data-i18n="profileBasic">基本信息</h2>
+              <span id="profileRole">--</span>
+            </div>
+            <div class="profile-facts">
+              <div><span data-i18n="profileName">用户名</span><strong id="profileName">--</strong></div>
+              <div><span data-i18n="profileDraftCount">草稿</span><strong id="profileDraftCount">0</strong></div>
+              <div><span data-i18n="profilePendingCount">审核中</span><strong id="profilePendingCount">0</strong></div>
+              <div><span data-i18n="profileApprovedCount">已通过</span><strong id="profileApprovedCount">0</strong></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

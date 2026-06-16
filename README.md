@@ -52,6 +52,25 @@ Admin can see the restricted audit panel, raw system activity, data source healt
 
 ---
 
+## Click-to-browse URL (GitHub Pages Demo)
+
+This repo includes a **static demo** of StarScope under `docs/` so it can be browsed from GitHub Pages without running the Java backend.
+
+After you enable GitHub Pages in the repo settings, the URL will be:
+
+```text
+https://Tai-Youran.github.io/csa_final_1/
+```
+
+Enable it:
+
+1. Go to GitHub repo **Settings** → **Pages**
+2. **Build and deployment** → Source: **Deploy from a branch**
+3. Branch: `main` (or `master`) · Folder: `/docs`
+4. Save, wait 1–2 minutes, then open the URL above.
+
+---
+
 ## Older Version: PulseWire
 
 PulseWire is a Java live tech sentiment application that scrapes 50+ Hacker News posts, converts raw HTML into object-oriented Java models, ranks the results with custom algorithms, and displays the data through either a terminal UI or a browser-based web dashboard.

